@@ -16,11 +16,17 @@ def passo_constante(
     verbose: bool = False,
     monitor: list = None,
 ) -> tuple[np.ndarray, np.ndarray]:
-    # TODO: Remover float, float da função callable, e adicionar apenas np.ndarray
     if verbose:
         print(y("Inicializando Método do Passo Constante"))
     if monitor is not None:
         monitor.append(p0)
+
+    # Realiza 1 passo para verificar se é necessário inverter a direção
+    check = make_step(p0, alfa, n)
+    f_check = func(check[0], check[1])
+    if f_check > func(p0[0], p0[1]):
+        n = -n
+
     for i in range(n_max_step):
         p1 = make_step(p0, alfa, n)
         f0 = func(p0[0], p0[1])
@@ -55,6 +61,13 @@ def bissecao(
 
     # norm_dir = n / np.linalg.norm(n)
     norm_dir = n
+
+    # Realiza 1 passo para verificar se é necessário inverter a direção
+    pfpi = pf - pi
+    pfpi_norm = pfpi / np.linalg.norm(pfpi)
+    norm_n = n / np.linalg.norm(n)
+    if not np.allclose(pfpi_norm, norm_n, rtol=1e-05, atol=1e-08):
+        norm_dir = -n
 
     for i in range(n_max_step):
         mid_point = (pi + pf) / 2
@@ -104,6 +117,21 @@ def secao_aurea(
 
     norm_dir = n / np.linalg.norm(n)
     ra = (np.sqrt(5) - 1) / 2
+
+    # Realiza 1 passo para verificar se é necessário inverter a direção
+    beta = np.linalg.norm(pf - pi)
+    beta_dir = (1 / beta) * norm_dir
+
+    p_f1 = make_step(pi, (1 - ra) * (1 / beta), beta_dir)
+    p_f2 = make_step(pi, ra * (1 / beta), beta_dir)
+
+    mid_point = (p_f1 + p_f2) / 2
+    f1 = func(p_f1[0], p_f1[1])
+    f2 = func(p_f2[0], p_f2[1])
+    f_check = func(mid_point[0], mid_point[1])
+    if f_check > func(pi[0], pi[1]):
+        norm_dir = -n
+
     for i in range(n_max_step):
         beta = np.linalg.norm(pf - pi)
         beta_dir = (1 / beta) * norm_dir

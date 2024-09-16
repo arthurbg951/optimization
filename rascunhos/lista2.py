@@ -15,7 +15,9 @@ alfa = 0.01
 tol = 10e-5
 
 
-def analise(p0: np.ndarray, n: np.ndarray, f: Callable[[float, float], float]):
+def analise(
+    p0: np.ndarray, n: np.ndarray, f: Callable[[float, float], float], show_curves=False
+):
     grad_monitor_cte = []
     cte_min = passo_constante(
         p0,
@@ -33,11 +35,12 @@ def analise(p0: np.ndarray, n: np.ndarray, f: Callable[[float, float], float]):
         f"Mínimo encontrado: {cte_min} com valor {a(cte_min[0], cte_min[1])} com steps = {len(grad_monitor_cte)-1}"
     )
     # plot_local(grad_local[:, 0], grad_local[:, 1])
-    plot_curves(p0, cte_min, f)
+    if show_curves:
+        plot_curves(p0, cte_min, f)
 
     grad_monitor_bi = []
     bi_min = bissecao(
-        grad_monitor_cte[0],
+        p0,
         grad_monitor_cte[-1],
         n,
         f,
@@ -53,11 +56,12 @@ def analise(p0: np.ndarray, n: np.ndarray, f: Callable[[float, float], float]):
         f"Mínimo encontrado: {bi_min} com valor {a(bi_min[0], bi_min[1])} com steps = {len(grad_monitor_bi)-1}"
     )
     # plot_local(grad_local[:, 0], grad_local[:, 1])
-    plot_curves(p0, bi_min, f)
+    if show_curves:
+        plot_curves(p0, bi_min, f)
 
     grad_monitor_au = []
     au_min = secao_aurea(
-        grad_monitor_cte[0],
+        p0,
         grad_monitor_cte[-1],
         n,
         f,
@@ -73,28 +77,29 @@ def analise(p0: np.ndarray, n: np.ndarray, f: Callable[[float, float], float]):
         f"Mínimo encontrado: {au_min} com valor {a(au_min[0], au_min[1])} com steps = {len(grad_monitor_au)-1}"
     )
     # plot_local(grad_local[:, 0], grad_local[:, 1])
-    plot_curves(p0, au_min, f)
+    if show_curves:
+        plot_curves(p0, au_min, f)
 
 
 def letra_a():
     print(g(" -> Letra A"))
     p0 = np.array([1, 2])
     n = np.array([-1, -2])
-    analise(p0, n, a)
+    analise(p0, n, a, show_curves=False)
 
 
 def letra_b():
     print(g(" -> Letra B"))
     p0 = np.array([-2, 3])
     n = np.array([1.453, -4.547])
-    analise(p0, n, mc_cormick)
+    analise(p0, n, mc_cormick, show_curves=False)
 
 
 def letra_c():
     print(g(" -> Letra C"))
     p0 = np.array([0, 5])
     n = np.array([3, 1.5])
-    analise(p0, n, himmelblau)
+    analise(p0, n, himmelblau, show_curves=False)
 
 
 if __name__ == "__main__":
