@@ -67,7 +67,8 @@ def plot_curves(pi: np.ndarray, pf: np.ndarray, func: Callable[[float, float], f
     X, Y = np.meshgrid(x, y)
 
     # Calcular Z = f(X, Y)
-    Z = func(X, Y)
+    f_vec = np.vectorize(lambda x, y: func(np.array([x, y])))
+    Z = f_vec(X, Y)
 
     # Criar o gráfico de curvas de nível
     plt.figure(figsize=__fig_size)

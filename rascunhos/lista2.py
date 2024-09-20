@@ -16,19 +16,24 @@ tol = 1e-6
 
 
 def main():
-    letra_a()
-    letra_b()
-    letra_c()
+    letra_a(show_curves=True)
+    letra_b(show_curves=True)
+    letra_c(show_curves=True)
 
 
 def run_analise(
     p0: np.ndarray,
     n: np.ndarray,
     f: Callable[[np.ndarray], float],
+    show_curves: bool = False,
 ):
-    aU, aL = run_passo_constante(p0, alfa, n, f, verbose=False)
+    aU, aL, min_pc = run_passo_constante(p0, alfa, n, f, verbose=False)
     min_bi = run_bissecao(p0, n, aU, aL, f, tol, verbose=False)
     min_au = run_secao_aurea(p0, n, aU, aL, f, tol, verbose=False)
+    if show_curves:
+        plot_curves(p0, min_pc, f)
+        plot_curves(p0, min_bi, f)
+        plot_curves(p0, min_au, f)
 
 
 def run_passo_constante(
@@ -48,9 +53,13 @@ def run_passo_constante(
         monitor=monitor_percurso,
     )
 
-    print(y("Passo Constante"))
-    print(f"Mínimo entre: aU = {aU} aL = {aL} com steps = {len(monitor_percurso)}")
-    return aU, aL
+    print(y("Passo Constante") + f" aU = {aU} aL = {aL}")
+    aM = (aU + aL) / 2
+    p_min = make_step(p0, aM, n)
+    print(
+        f"Mínimo encontrado: {p_min} com valor {f(p_min)} com steps = {len(monitor_percurso)}"
+    )
+    return aU, aL, p_min
 
 
 def run_bissecao(
@@ -103,25 +112,25 @@ def run_secao_aurea(
     return p_min
 
 
-def letra_a():
+def letra_a(show_curves=False):
     print(g(" -> Letra A"))
     p0 = np.array([1, 2])
     n = np.array([-1, -2])
-    run_analise(p0, n, a)
+    run_analise(p0, n, a, show_curves=show_curves)
 
 
-def letra_b():
+def letra_b(show_curves=False):
     print(g(" -> Letra B"))
     p0 = np.array([-2, 3])
     n = np.array([1.453, -4.547])
-    run_analise(p0, n, mc_cormick)
+    run_analise(p0, n, mc_cormick, show_curves=show_curves)
 
 
-def letra_c():
+def letra_c(show_curves=False):
     print(g(" -> Letra C"))
     p0 = np.array([0, 5])
     n = np.array([3, 1.5])
-    run_analise(p0, n, himmelblau)
+    run_analise(p0, n, himmelblau, show_curves=show_curves)
 
 
 if __name__ == "__main__":

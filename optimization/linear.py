@@ -36,13 +36,10 @@ def passo_constante(
         if monitor is not None:
             monitor.append(p_buff)
         if f1 > f0:
-            # return p_buff
             return alfa * (i + 1), alfa * i
         p_buff = p1
 
-    if verbose:
-        print(r("Número máximo de passos atingido."))
-    # return p_buff
+    print(r("Número máximo de passos atingido."))
     return alfa * (i + 1), alfa * i
 
 
@@ -83,13 +80,12 @@ def bissecao(
         if f1 > f2:
             aL = aM
             continue
-        if f2 > f1:
+        if f2 >= f1:
             aU = aM
             continue
         raise Exception("Erro inesperado.")
 
-    if verbose:
-        print(r("Número máximo de passos atingido."))
+    print(r("Número máximo de passos atingido."))
     if out_n_steps:
         return aM, i + 1
     else:
@@ -159,8 +155,7 @@ def secao_aurea(
             p_aE = make_step(p0, aE, n)
             fE = func(p_aE)
 
-    if verbose:
-        print(r("Número máximo de passos atingido."))
+    print(r("Número máximo de passos atingido."))
     if out_n_steps:
         return (aE + aD) / 2, n_steps
     else:
