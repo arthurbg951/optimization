@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def lista1_4(p: np.ndarray):
+def lista1_4(p: np.ndarray) -> float:
     x1, x2 = p[0], p[1]
     return (
         0.5 * (((12 + x1) ** 2 + x2**2) ** 0.5 - 12) ** 2
@@ -10,17 +10,17 @@ def lista1_4(p: np.ndarray):
     )
 
 
-def a(p: np.ndarray):
+def a(p: np.ndarray) -> float:
     x1, x2 = p[0], p[1]
     return x1**2 - 3 * x1 * x2 + 4 * x2**2 + x1 - x2
 
 
-def mc_cormick(p: np.ndarray):
+def mc_cormick(p: np.ndarray) -> float:
     x1, x2 = p[0], p[1]
     return np.sin(x1 + x2) + (x1 - x2) ** 2 - 1.5 * x1 + 2.5 * x2
 
 
-def himmelblau(p: np.ndarray):
+def himmelblau(p: np.ndarray) -> float:
     x1, x2 = p[0], p[1]
     return (x1**2 + x2 - 11) ** 2 + (x1 + x2**2 - 7) ** 2
 
