@@ -1,5 +1,4 @@
 import numpy as np
-import sympy as sp
 from typing import Callable
 
 
@@ -15,21 +14,6 @@ def is_symetric(matriz: np.ndarray) -> bool:
             return False
     else:
         return False
-
-
-def get_jacobian(f: Callable, x1, x2):
-    df_dx1 = sp.diff(f, x1)
-    df_dx2 = sp.diff(f, x2)
-    return np.array([df_dx1, df_dx2])
-
-
-def get_hessian(f: Callable, x1, x2):
-    df_dx1, df_dx2 = get_jacobian(f, x1, x2)
-    df_dxx = sp.diff(df_dx1, x1)
-    df_dyy = sp.diff(df_dx2, x2)
-    df_dxy = sp.diff(df_dx1, x2)
-    df_dyx = sp.diff(df_dx2, x1)
-    return np.array([[df_dxx, df_dxy], [df_dyx, df_dyy]])
 
 
 def local(points: np.ndarray):

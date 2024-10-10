@@ -26,7 +26,8 @@ def passo_constante(
         alfa = -alfa
 
     p_buff = p0
-    for i in range(n_max_step):
+    i = 0
+    while True:
         new_alfa = alfa * (i + 1)
         p1 = make_step(p0, new_alfa, n)
         f0 = func(p_buff)
@@ -38,8 +39,9 @@ def passo_constante(
         if f1 > f0:
             return alfa * (i + 1), alfa * i
         p_buff = p1
+        i += 1
 
-    print(r("Número máximo de passos atingido."))
+    print(r("Número máximo de passos atingido passo constante."))
     return alfa * (i + 1), alfa * i
 
 
@@ -85,7 +87,7 @@ def bissecao(
             continue
         raise Exception("Erro inesperado.")
 
-    print(r("Número máximo de passos atingido."))
+    print(r("Número máximo de passos atingido bissecao."))
     if out_n_steps:
         return aM, i + 1
     else:
@@ -102,7 +104,7 @@ def secao_aurea(
     n_max_step: int = 1000,
     verbose: bool = False,
     out_n_steps: bool = False,
-):
+) -> tuple[float, float] | float:
     if verbose:
         print(y("Inicializando Método da Seção Áurea"))
 
@@ -124,8 +126,8 @@ def secao_aurea(
     if verbose:
         mid_point = (p_aE + p_aD) / 2
         print(f"passo: {g(1)}, f({mid_point[0]}, {mid_point[1]})={func(mid_point)}")
-
-    for i in range(1, n_max_step):
+    i = 0
+    while True:
         n_steps += 1
         if verbose:
             mid_point = (p_aE + p_aD) / 2
@@ -154,8 +156,9 @@ def secao_aurea(
             aE = aL + comp_ra * (aU - aL)
             p_aE = make_step(p0, aE, n)
             fE = func(p_aE)
+        i += 1
 
-    print(r("Número máximo de passos atingido."))
+    print(r("Número máximo de passos atingido golden."))
     if out_n_steps:
         return (aE + aD) / 2, n_steps
     else:
