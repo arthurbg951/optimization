@@ -58,10 +58,27 @@ def plot_local(alfa: np.ndarray, z: np.ndarray):
     plt.show()
 
 
-def plot_curves(pi: np.ndarray, pf: np.ndarray, func: Callable[[float, float], float]):
+def plot_curves(
+    points: list[np.ndarray],
+    func: Callable[[float, float], float],
+    n_points=100,
+    countour_levels=50,
+    title="Curvas de Nível de f(x, y)",
+):
+    pi = points[0]
+    pf = points[-1]
+
+    # Calcular o min e max
+    min_x = min(p[0] for p in points)
+    max_x = max(p[0] for p in points)
+    min_y = min(p[1] for p in points)
+    max_y = max(p[1] for p in points)
+
+    margin = 0.5
+
     # Definir os limites do gráfico e a discretização
-    x = np.linspace(-5, 5, 100)
-    y = np.linspace(-5, 5, 100)
+    x = np.linspace(min_x - margin, max_x + margin, n_points)
+    y = np.linspace(min_y - margin, max_y + margin, n_points)
 
     # Criar a malha de pontos (grid) para x e y
     X, Y = np.meshgrid(x, y)
@@ -72,7 +89,7 @@ def plot_curves(pi: np.ndarray, pf: np.ndarray, func: Callable[[float, float], f
 
     # Criar o gráfico de curvas de nível
     plt.figure(figsize=__fig_size)
-    contour = plt.contour(X, Y, Z, levels=50, cmap="viridis")
+    contour = plt.contour(X, Y, Z, levels=countour_levels, cmap="viridis")
 
     # Plotar os pontos inicial e final
     plt.scatter(pi[0], pi[1], color="red", label="Ponto Inicial")
@@ -82,7 +99,7 @@ def plot_curves(pi: np.ndarray, pf: np.ndarray, func: Callable[[float, float], f
     plt.text(
         pi[0],
         pi[1],
-        f"pi {pi}",
+        f"pi [{pi[0]:.2f}, {pi[1]:.2f}]",
         color="red",
         fontsize=12,
         ha="right",
@@ -90,25 +107,28 @@ def plot_curves(pi: np.ndarray, pf: np.ndarray, func: Callable[[float, float], f
     plt.text(
         pf[0],
         pf[1],
-        f"pf {pf}",
+        f"pf [{pf[0]:.2f}, {pf[1]:.2f}]",
         color="blue",
         fontsize=12,
         ha="left",
     )
 
     # Traçar uma linha ligando os dois pontos
-    plt.plot(
-        [pi[0], pf[0]],
-        [pi[1], pf[1]],
-        color="green",
-        linestyle="--",
-    )
+    for i in range(1, len(points)):
+        p0 = points[i - 1]
+        p1 = points[i]
+        plt.plot(
+            [p0[0], p1[0]],
+            [p0[1], p1[1]],
+            color="green",
+            linestyle="--",
+        )
 
     # Adicionar rótulos às curvas de nível
     plt.clabel(contour, inline=True, fontsize=8)
 
     # Configurações adicionais do gráfico
-    plt.title("Curvas de Nível de f(x, y)")
+    plt.title(title)
     plt.xlabel("x")
     plt.ylabel("y")
 
