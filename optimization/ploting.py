@@ -64,7 +64,9 @@ def plot_curves(
     n_points=100,
     countour_levels=50,
     title="Curvas de Nível de f(x, y)",
+    show_fig=False,
 ):
+    # TODO: alterar nome da função para plot_curve ou semelhante
     pi = points[0]
     pf = points[-1]
 
@@ -88,7 +90,7 @@ def plot_curves(
     Z = f_vec(X, Y)
 
     # Criar o gráfico de curvas de nível
-    plt.figure(figsize=__fig_size)
+    fig = plt.figure(figsize=__fig_size)
     contour = plt.contour(X, Y, Z, levels=countour_levels, cmap="viridis")
 
     # Plotar os pontos inicial e final
@@ -136,7 +138,30 @@ def plot_curves(
     # plt.colorbar(contour)
 
     # Exibir o gráfico
+    if show_fig:
+        plt.show()
+
+    return fig
+
+
+def plot_images(figuras: list[np.ndarray]):
+    # Criação da figura principal com 2 linhas e 3 colunas de subplots
+    fig, axs = plt.subplots(2, 3, figsize=(15, 10))
+
+    # Loop para desenhar cada subfigura na grade
+    for i, figura in enumerate(figuras):
+        ax = axs[i // 3, i % 3]  # Determina a posição do subplot na grade 2x3
+        for (
+            child
+        ) in figura.get_children():  # Copia o conteúdo de cada figura para o subplot
+            ax.add_artist(child)
+        ax.axis("on")  # Exibe os eixos
+
+    # Ajuste do layout e exibição
+    plt.tight_layout()
     plt.show()
+
+    return fig
 
 
 def show_surface(func, p1, p2, discretization=100, min_point: np.ndarray = None):

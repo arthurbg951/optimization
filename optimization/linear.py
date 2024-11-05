@@ -16,6 +16,7 @@ def passo_constante(
     verbose: bool = False,
     monitor: list[np.ndarray] = None,
 ) -> np.ndarray:
+    # TODO: Remover n_max_step da função
     if verbose:
         print(y("Inicializando Método do Passo Constante"))
 
