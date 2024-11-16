@@ -6,7 +6,7 @@ import numpy as np
 from .linear import make_step, passo_constante, secao_aurea
 from .colors import red as r, green as g, yellow as y
 
-n_max_steps = 500
+n_max_steps = 1000
 
 
 def univariante(
@@ -24,13 +24,15 @@ def univariante(
 
     points: list[np.ndarray] = [p0]  # Percurso da minimização
 
-    d1 = np.array([1.0, 0.0], dtype=np.float64)
-    d2 = np.array([0.0, 1.0], dtype=np.float64)
+    d1 = np.array([1, 0], dtype=np.float64)
+    d2 = np.array([0, 1], dtype=np.float64)
 
     actual_d = d1
     actual_p = p0
 
     for i in range(n_max_steps):
+        # i = 0
+        # while True:
         aL, aU = passo_constante(actual_p, alfa, actual_d, func, n_max_step=n_max_steps)
         a_min = secao_aurea(
             actual_p, actual_d, aL, aU, func, tol / 10, n_max_step=n_max_steps
@@ -39,7 +41,7 @@ def univariante(
         points.append(next_p)
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]}, {next_p[1]})={func(next_p)} norm gradient={np.linalg.norm(f_grad(next_p))}"
+                f"Passo {g(i+1)}: f({next_p[0]:>23}, {next_p[1]:>23})={func(next_p):>23} norm gradient={np.linalg.norm(f_grad(next_p)):>23}"
             )
 
         # Verificar se convergiu
@@ -58,6 +60,7 @@ def univariante(
 
         # Trocar ponto
         actual_p = next_p
+        i += 1
 
     print(r("Número máximo de iterações atingido univariante."))
     if monitor:
@@ -108,7 +111,7 @@ def powell(
                 return actual_p
 
             if d is None:
-                d = points[-1] - points[-2]
+                d = points[-1] - points[-3]
                 directions[2] = d
                 # d_base = d
 
@@ -129,7 +132,8 @@ def powell(
             if verbose:
                 # print(f"Vetor de direções : {directions} d: {d}")
                 print(
-                    f"Passo {g(steps_count+1)}: f({next_p[0]}, {next_p[1]}) = {func(next_p)}"
+                    f"Passo {g(steps_count+1)}: f({next_p[0]:>23}, {next_p[1]:>23}) = {func(next_p):>23} "
+                    f" grad norm = {np.linalg.norm(f_grad(next_p)):>23}"
                 )
 
             # Atualizar posição atual
@@ -177,7 +181,10 @@ def steepest_descent(
         points.append(next_p)
         p_atual = next_p
         if verbose:
-            print(f"Passo {g(i+1)}: f({next_p[0]}, {next_p[1]})={func(next_p)}")
+            print(
+                f"Passo {g(i+1)}: f({next_p[0]:>23}, {next_p[1]:>23})={func(next_p):>23}"
+                + f" grad norm={np.linalg.norm(f_grad(next_p)):>23}"
+            )
 
     print(r("Número de iterações máximas atingido Steepest Descent."))
     if monitor:
@@ -189,6 +196,7 @@ def fletcher_reeves(
     p0: np.ndarray,
     func: Callable,
     f_grad: Callable,
+    # f_hess: Callable,
     alfa: float,
     tol: float,
     n_max_steps=n_max_steps,
@@ -204,7 +212,20 @@ def fletcher_reeves(
     grad_atual = f_grad(p_atual)
     d = -grad_atual  # Primeira direção de descida
 
+    # Repetição do gradiente
+    n_max_repeated_grad = 2
+    same_grad_count = 0
+    norm_last_grad = np.linalg.norm(grad_atual)
     for i in range(n_max_steps):
+        # Critério de parada com base no número de repetições do gradiente
+        if np.linalg.norm(grad_atual) == norm_last_grad:
+            same_grad_count += 1
+        else:
+            same_grad_count = 0
+            norm_last_grad = np.linalg.norm(grad_atual)
+        if same_grad_count == n_max_repeated_grad:
+            print(r(f"Gradiente repetido {same_grad_count} vezes. Parando."))
+            break
         # Critério de parada baseado na norma do gradiente
         if np.linalg.norm(grad_atual) < tol:
             if verbose:
@@ -216,6 +237,7 @@ def fletcher_reeves(
         # Busca de linha (secao_aurea ou método equivalente)
         aL, aU = passo_constante(p_atual, alfa, d, func)
         a_min = secao_aurea(p_atual, d, aL, aU, func, tol / 10)
+        # a_min = -(grad_atual.T @ d) / (d.T @ f_hess(p_atual) @ d)
 
         # Atualiza o ponto
         next_p = make_step(p_atual, a_min, d)
@@ -223,15 +245,14 @@ def fletcher_reeves(
 
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]}, {next_p[1]}) = {func(next_p)}, "
-                f"grad norm = {np.linalg.norm(f_grad(next_p))}"
+                f"Passo {g(i+1)}: f({next_p[0]:>23}, {next_p[1]:>23}) = {func(next_p):>23}, "
+                f"grad norm = {np.linalg.norm(f_grad(next_p)):>23}"
             )
 
         # Atualiza o gradiente e calcula beta (Fletcher-Reeves)
         grad_prox = f_grad(next_p)
-        beta = (grad_prox.T @ grad_prox) / (
-            grad_atual.T @ grad_atual
-        )  # Correto cálculo de beta
+        beta = (grad_prox.T @ grad_prox) / (grad_atual.T @ grad_atual)
+        # beta = (grad_prox.T @ grad_prox) / (grad_atual.T @ f_hess(p_atual) @ grad_atual)
 
         # Atualiza a direção de descida
         d = -grad_prox + beta * d
@@ -264,7 +285,20 @@ def newton_raphson(
 
     p_atual = p0
 
+    # Repetição do gradiente
+    n_max_repeated_grad = 5
+    same_grad_count = 0
+    norm_last_grad = np.linalg.norm(f_grad(p_atual))
     for i in range(n_max_steps):
+        # Critério de parada com base no número de repetições do gradiente
+        if np.linalg.norm(f_grad(p_atual)) == norm_last_grad:
+            same_grad_count += 1
+        else:
+            same_grad_count = 0
+            norm_last_grad = np.linalg.norm(f_grad(p_atual))
+        if same_grad_count == n_max_repeated_grad:
+            print(r(f"Gradiente repetido {same_grad_count} vezes. Parando."))
+            break
         if np.linalg.norm(f_grad(p_atual)) < tol:
             if verbose:
                 print(g(f"Convergiu em {i} passos"))  # i, pois ainda não realizou passo
@@ -273,13 +307,14 @@ def newton_raphson(
             return p_atual
 
         d = -np.linalg.inv(f_hess(p_atual)) @ f_grad(p_atual)
+        # print(f"d: {d}")
         aL, aU = passo_constante(p_atual, alfa, d, func)
         a_min = secao_aurea(p_atual, d, aL, aU, func, tol / 10)
         next_p = make_step(p_atual, a_min, d)
         points.append(next_p)
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]}, {next_p[1]})={func(next_p)} grad norm={np.linalg.norm(f_grad(next_p))}"
+                f"Passo {g(i+1)}: f({next_p[0]:>23}, {next_p[1]:>23})={func(next_p):>23} grad norm={np.linalg.norm(f_grad(next_p)):>23}"
             )
         p_atual = next_p
 
@@ -304,11 +339,25 @@ def bfgs(
 
     points: list[np.ndarray] = [p0]  # Percurso da minimização
 
-    p_atual = p0
-    S = np.eye(len(p0))  # Matriz identidade para o tamanho de p0
+    p_atual = np.copy(p0)
+    S = np.eye(len(p0), dtype=np.float32)  # Matriz identidade para o tamanho de p0
 
+    # Repetição do gradiente
+    n_max_repeated_grad = 5
+    same_grad_count = 0
+    norm_last_grad = np.linalg.norm(f_grad(p_atual))
     for i in range(n_max_steps):
         grad_atual = f_grad(p_atual)
+
+        # Critério de parada com base no número de repetições do gradiente
+        if np.linalg.norm(grad_atual) == norm_last_grad:
+            same_grad_count += 1
+        else:
+            same_grad_count = 0
+            norm_last_grad = np.linalg.norm(grad_atual)
+        if same_grad_count == n_max_repeated_grad:
+            print(r(f"Gradiente repetido {same_grad_count} vezes. Parando."))
+            break
 
         if np.linalg.norm(grad_atual) < tol:
             if verbose:
@@ -347,12 +396,12 @@ def bfgs(
 
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]}, {next_p[1]}) = {func(next_p)}, "
-                f"grad norm = {np.linalg.norm(grad_prox)}"
+                f"Passo {g(i+1)}: f({next_p[0]:>23}, {next_p[1]:>23}) = {func(next_p):>23}, "
+                f"grad norm = {np.linalg.norm(grad_prox):>23}"
             )
 
         # Atualiza o ponto atual
-        p_atual = next_p
+        p_atual = np.copy(next_p)
 
     print(r("Número máximo de iterações atingido no BFGS."))
     if monitor:

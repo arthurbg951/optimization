@@ -11,6 +11,7 @@ from mpl_toolkits.mplot3d import Axes3D
 # Definindo função simbólica e variáveis
 x1, x2 = sp.symbols("x1 x2")
 
+
 f = (
     0.5 * (((12 + x1) ** 2 + x2**2) ** 0.5 - 12) ** 2
     + 5 * (((8 - x1) ** 2 + x2**2) ** 0.5 - 8) ** 2
@@ -43,14 +44,15 @@ alfa_values = np.linspace(0, dist, num_points)
 plt.figure(figsize=(10, 6))
 plt.plot(alfa_values, f_values, marker="o")
 plt.title("Valores de f para os pontos dados")
-plt.xlabel("Índice do ponto")
-plt.ylabel("f(x, y)")
+plt.xlabel("alfa")
+plt.ylabel("f(x, alfa, d)")
 plt.grid(True)
 plt.show()
 
 # Gerando um domínio para plotar a superfície de f
-x_domain = np.linspace(-10, 10, 100)
-y_domain = np.linspace(-10, 10, 100)
+dominio = 10
+x_domain = np.linspace(-dominio, dominio, 100)
+y_domain = np.linspace(-dominio, dominio, 100)
 X, Y = np.meshgrid(x_domain, y_domain)
 Z = f_lambdified(X, Y)
 
@@ -60,8 +62,8 @@ ax = fig.add_subplot(111, projection="3d")
 ax.plot_surface(X, Y, Z, cmap="viridis")
 
 # Configurações adicionais do gráfico
-ax.set_title("Superfície da função f(x, y)")
-ax.set_xlabel("x")
-ax.set_ylabel("y")
-ax.set_zlabel("f(x, y)")
+ax.set_title("Superfície da função f(x1, x2)")
+ax.set_xlabel("x1")
+ax.set_ylabel("x2")
+ax.set_zlabel("f(x1, x2)")
 plt.show()

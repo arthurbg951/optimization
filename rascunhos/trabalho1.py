@@ -345,9 +345,9 @@ def letra_d():
 
 def primeira_questao():
     letra_a()
-    letra_b()
-    letra_c()
-    letra_d()
+    # letra_b()
+    # letra_c()
+    # letra_d()
 
 
 def segunda_questao():
