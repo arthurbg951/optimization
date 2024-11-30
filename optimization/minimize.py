@@ -6,7 +6,7 @@ import numpy as np
 from .linear import make_step, passo_constante, secao_aurea
 from .colors import red as r, green as g, yellow as y
 
-n_max_steps = 1000
+N_MAX_STEPS = 500
 
 
 def univariante(
@@ -14,8 +14,9 @@ def univariante(
     func: Callable,
     f_grad: Callable,
     alfa: float,
-    tol: float,
-    n_max_steps=n_max_steps,
+    tol_grad: float,
+    tol_line: float,
+    n_max_steps=N_MAX_STEPS,
     verbose=False,
     monitor=False,
 ) -> np.ndarray:
@@ -35,17 +36,19 @@ def univariante(
         # while True:
         aL, aU = passo_constante(actual_p, alfa, actual_d, func, n_max_step=n_max_steps)
         a_min = secao_aurea(
-            actual_p, actual_d, aL, aU, func, tol / 10, n_max_step=n_max_steps
+            actual_p, actual_d, aL, aU, func, tol_line, n_max_step=n_max_steps
         )
         next_p = make_step(actual_p, a_min, actual_d)
         points.append(next_p)
+        grad_norm = np.linalg.norm(f_grad(next_p))
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]:>23}, {next_p[1]:>23})={func(next_p):>23} norm gradient={np.linalg.norm(f_grad(next_p)):>23}"
+                f"Passo {g(i+1)}: f({next_p[0]:>23}, {next_p[1]:>23})={func(next_p):>23}"
+                f"norm gradient={grad_norm:>23}"
             )
 
         # Verificar se convergiu
-        if np.linalg.norm(f_grad(next_p)) < tol:
+        if grad_norm < tol_grad:
             if verbose:
                 print(g(f"Convergiu em {i+1} passos"))
             if monitor:
@@ -73,8 +76,9 @@ def powell(
     func: Callable,
     f_grad: Callable,
     alfa: float,
-    tol: float,
-    n_max_steps=n_max_steps,
+    tol_grad: float,
+    tol_line: float,
+    n_max_steps=N_MAX_STEPS,
     verbose=False,
     monitor=False,
 ) -> np.ndarray:
@@ -103,7 +107,7 @@ def powell(
                 break
 
             # Verificar se convergiu
-            if np.linalg.norm(f_grad(actual_p)) < tol:
+            if np.linalg.norm(f_grad(actual_p)) < tol_grad:
                 if verbose:
                     print(g(f"Convergiu em {steps_count+1} passos"))
                 if monitor:
@@ -123,7 +127,7 @@ def powell(
                 aL,
                 aU,
                 func,
-                tol / 10,
+                tol_line,
                 n_max_step=n_max_steps,
             )
             next_p = make_step(actual_p, a_min, d)  # Próximo ponto
@@ -132,8 +136,9 @@ def powell(
             if verbose:
                 # print(f"Vetor de direções : {directions} d: {d}")
                 print(
-                    f"Passo {g(steps_count+1)}: f({next_p[0]:>23}, {next_p[1]:>23}) = {func(next_p):>23} "
-                    f" grad norm = {np.linalg.norm(f_grad(next_p)):>23}"
+                    f"Passo {g(steps_count+1)}: "
+                    f"f({next_p[0]:>23}, {next_p[1]:>23}) = {func(next_p):>23} "
+                    f"grad norm = {np.linalg.norm(f_grad(next_p)):>23}"
                 )
 
             # Atualizar posição atual
@@ -155,8 +160,9 @@ def steepest_descent(
     func: Callable,
     f_grad: Callable,
     alfa: float,
-    tol: float,
-    n_max_steps=n_max_steps,
+    tol_grad: float,
+    tol_line: float,
+    n_max_steps=N_MAX_STEPS,
     verbose=False,
     monitor=False,
 ) -> np.ndarray:
@@ -168,7 +174,7 @@ def steepest_descent(
     p_atual = p0
     for i in range(n_max_steps):
         d = -f_grad(p_atual)
-        if np.linalg.norm(d) < tol:
+        if np.linalg.norm(d) < tol_grad:
             if verbose:
                 print(g(f"Convergiu em {i} passos"))  # i, pois ainda não realizou passo
             if monitor:
@@ -176,14 +182,15 @@ def steepest_descent(
             return p_atual
 
         aU, aL = passo_constante(p_atual, alfa, d, func)
-        a_min = secao_aurea(p_atual, d, aU, aL, func, tol / 10)
+        a_min = secao_aurea(p_atual, d, aU, aL, func, tol_line)
         next_p = make_step(p_atual, a_min, d)
         points.append(next_p)
         p_atual = next_p
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]:>23}, {next_p[1]:>23})={func(next_p):>23}"
-                + f" grad norm={np.linalg.norm(f_grad(next_p)):>23}"
+                f"Passo {g(i+1)}: f({next_p[0]:>23}, "
+                f"{next_p[1]:>23})={func(next_p):>23} "
+                f"grad norm={np.linalg.norm(f_grad(next_p)):>23}"
             )
 
     print(r("Número de iterações máximas atingido Steepest Descent."))
@@ -196,10 +203,10 @@ def fletcher_reeves(
     p0: np.ndarray,
     func: Callable,
     f_grad: Callable,
-    # f_hess: Callable,
     alfa: float,
-    tol: float,
-    n_max_steps=n_max_steps,
+    tol_grad: float,
+    tol_line: float,
+    n_max_steps=N_MAX_STEPS,
     verbose=False,
     monitor=False,
 ) -> np.ndarray:
@@ -227,7 +234,7 @@ def fletcher_reeves(
             print(r(f"Gradiente repetido {same_grad_count} vezes. Parando."))
             break
         # Critério de parada baseado na norma do gradiente
-        if np.linalg.norm(grad_atual) < tol:
+        if np.linalg.norm(grad_atual) < tol_grad:
             if verbose:
                 print(g(f"Convergiu em {i} passos"))
             if monitor:
@@ -236,8 +243,7 @@ def fletcher_reeves(
 
         # Busca de linha (secao_aurea ou método equivalente)
         aL, aU = passo_constante(p_atual, alfa, d, func)
-        a_min = secao_aurea(p_atual, d, aL, aU, func, tol / 10)
-        # a_min = -(grad_atual.T @ d) / (d.T @ f_hess(p_atual) @ d)
+        a_min = secao_aurea(p_atual, d, aL, aU, func, tol_line)
 
         # Atualiza o ponto
         next_p = make_step(p_atual, a_min, d)
@@ -245,14 +251,14 @@ def fletcher_reeves(
 
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]:>23}, {next_p[1]:>23}) = {func(next_p):>23}, "
+                f"Passo {g(i+1)}: f({next_p[0]:>23}, "
+                f"{next_p[1]:>23}) = {func(next_p):>23}, "
                 f"grad norm = {np.linalg.norm(f_grad(next_p)):>23}"
             )
 
         # Atualiza o gradiente e calcula beta (Fletcher-Reeves)
         grad_prox = f_grad(next_p)
         beta = (grad_prox.T @ grad_prox) / (grad_atual.T @ grad_atual)
-        # beta = (grad_prox.T @ grad_prox) / (grad_atual.T @ f_hess(p_atual) @ grad_atual)
 
         # Atualiza a direção de descida
         d = -grad_prox + beta * d
@@ -273,8 +279,9 @@ def newton_raphson(
     f_grad: Callable,
     f_hess: Callable,
     alfa: float,
-    tol: float,
-    n_max_steps=n_max_steps,
+    tol_grad: float,
+    tol_line: float,
+    n_max_steps=N_MAX_STEPS,
     verbose=False,
     monitor=False,
 ) -> np.ndarray:
@@ -299,7 +306,7 @@ def newton_raphson(
         if same_grad_count == n_max_repeated_grad:
             print(r(f"Gradiente repetido {same_grad_count} vezes. Parando."))
             break
-        if np.linalg.norm(f_grad(p_atual)) < tol:
+        if np.linalg.norm(f_grad(p_atual)) < tol_grad:
             if verbose:
                 print(g(f"Convergiu em {i} passos"))  # i, pois ainda não realizou passo
             if monitor:
@@ -307,9 +314,8 @@ def newton_raphson(
             return p_atual
 
         d = -np.linalg.inv(f_hess(p_atual)) @ f_grad(p_atual)
-        # print(f"d: {d}")
         aL, aU = passo_constante(p_atual, alfa, d, func)
-        a_min = secao_aurea(p_atual, d, aL, aU, func, tol / 10)
+        a_min = secao_aurea(p_atual, d, aL, aU, func, tol_line)
         next_p = make_step(p_atual, a_min, d)
         points.append(next_p)
         if verbose:
@@ -329,8 +335,9 @@ def bfgs(
     func: Callable,
     f_grad: Callable,
     alfa: float,
-    tol: float,
-    n_max_steps=n_max_steps,
+    tol_grad: float,
+    tol_line: float,
+    n_max_steps=N_MAX_STEPS,
     verbose=False,
     monitor=False,
 ) -> np.ndarray:
@@ -359,7 +366,7 @@ def bfgs(
             print(r(f"Gradiente repetido {same_grad_count} vezes. Parando."))
             break
 
-        if np.linalg.norm(grad_atual) < tol:
+        if np.linalg.norm(grad_atual) < tol_grad:
             if verbose:
                 print(g(f"Convergiu em {i} passos"))
             if monitor:
@@ -371,7 +378,7 @@ def bfgs(
 
         # Busca de linha usando secao_aurea (ou sua função equivalente)
         aL, aU = passo_constante(p_atual, alfa, d, func)
-        a_min = secao_aurea(p_atual, d, aL, aU, func, tol / 10)
+        a_min = secao_aurea(p_atual, d, aL, aU, func, tol_line)
 
         # Realiza o próximo passo
         next_p = make_step(p_atual, a_min, d)

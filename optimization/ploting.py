@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from typing import Callable
 
 # Settings
@@ -72,11 +73,11 @@ def plot_curves(
 
     # Calcular o min e max
     min_x = min(p[0] for p in points)
-    max_x = max(p[0] for p in points)
     min_y = min(p[1] for p in points)
+    max_x = max(p[0] for p in points)
     max_y = max(p[1] for p in points)
 
-    margin = 0.5
+    margin = 1
 
     # Definir os limites do gráfico e a discretização
     x = np.linspace(min_x - margin, max_x + margin, n_points)
@@ -131,6 +132,7 @@ def plot_curves(
 
     # Configurações adicionais do gráfico
     plt.title(title)
+    plt.legend()
     plt.xlabel("x")
     plt.ylabel("y")
 
@@ -144,9 +146,233 @@ def plot_curves(
     return fig
 
 
+# def plot_restriction_curves(
+#     points: list[np.ndarray],
+#     f: Callable[[np.ndarray], np.ndarray],
+#     h_list: list[Callable[[np.ndarray], np.ndarray]],
+#     c_list: list[Callable[[np.ndarray], np.ndarray]],
+#     n_points=100,
+#     countour_levels=50,
+#     title="Gráfico das funções f(X), h(X) e c(X)",
+#     show_fig=False,
+# ):
+#     pi = points[0]
+#     pf = points[-1]
+
+#     margin = 0.1 * np.linalg.norm(pf - pi)
+
+#     # Calcular o min e max
+#     min_x = min(p[0] for p in points)
+#     min_y = min(p[1] for p in points)
+#     max_x = max(p[0] for p in points)
+#     max_y = max(p[1] for p in points)
+
+#     margin = 1
+
+#     # Definir os limites do gráfico e a discretização
+#     x = np.linspace(min_x - margin, max_x + margin, n_points)
+#     y = np.linspace(min_y - margin, max_y + margin, n_points)
+
+#     # Criar a malha de pontos (grid) para x e y
+#     X, Y = np.meshgrid(x, y)
+
+#     # Plotagem
+#     fig = plt.figure(figsize=__fig_size)
+
+#     # Plotar os pontos inicial e final
+#     plt.scatter(pi[0], pi[1], color="red", label="Ponto Inicial")
+#     plt.scatter(pf[0], pf[1], color="blue", label="Ponto Final")
+
+#     # Adicionar legendas aos pontos
+#     plt.text(
+#         pi[0],
+#         pi[1],
+#         f"pi [{pi[0]:.2f}, {pi[1]:.2f}]",
+#         color="red",
+#         fontsize=12,
+#         ha="right",
+#     )
+#     plt.text(
+#         pf[0],
+#         pf[1],
+#         f"pf [{pf[0]:.2f}, {pf[1]:.2f}]",
+#         color="blue",
+#         fontsize=12,
+#         ha="left",
+#     )
+
+#     # Traçar uma linha ligando os dois pontos
+#     for i in range(1, len(points)):
+#         p0 = points[i - 1]
+#         p1 = points[i]
+#         plt.plot(
+#             [p0[0], p1[0]],
+#             [p0[1], p1[1]],
+#             color="green",
+#             linestyle="--",
+#         )
+
+#     # Avaliar f(X)
+#     ZF = np.vectorize(lambda x1, x2: f(np.array([x1, x2])))(X, Y)
+#     contour = plt.contour(X, Y, ZF, levels=countour_levels, cmap="viridis")
+#     plt.clabel(contour, inline=True, fontsize=8)
+
+#     # Plotar cada função em h_list
+#     for i, h in enumerate(h_list, start=1):
+#         ZH = np.vectorize(lambda x1, x2: h(np.array([x1, x2])))(X, Y)
+#         plt.contour(
+#             X,
+#             Y,
+#             ZH,
+#             levels=[0],
+#             colors="yellow",
+#             linestyles="--",
+#             linewidths=1.2,
+#         )
+
+#     # Plotar cada função em c_list
+#     for i, c in enumerate(c_list, start=1):
+#         ZC = np.vectorize(lambda x1, x2: c(np.array([x1, x2])))(X, Y)
+#         plt.contour(
+#             X,
+#             Y,
+#             ZC,
+#             levels=[0],
+#             colors="red",
+#             linestyles="-.",
+#             linewidths=1.2,
+#         )
+
+#     # Configuração do gráfico
+#     # GERANDO ERRO NO PLOT DEVIDO AOS LIMITES DO GRÁFICO
+#     # plt.axhline(0, color="black", linewidth=0.5, linestyle="--")  # Linha do eixo X
+#     # plt.axvline(0, color="black", linewidth=0.5, linestyle="--")  # Linha do eixo Y
+#     plt.title(title)
+#     plt.xlabel("x1")
+#     plt.ylabel("x2")
+#     plt.grid(True)
+#     plt.tight_layout()
+
+#     # Mostrar o gráfico
+#     if show_fig:
+#         plt.show()
+
+
+#     return fig
+def plot_restriction_curves(
+    points: list[np.ndarray],
+    f: Callable[[np.ndarray], np.ndarray],
+    h_list: list[Callable[[np.ndarray], np.ndarray]],
+    c_list: list[Callable[[np.ndarray], np.ndarray]],
+    n_points=1000,
+    countour_levels=50,
+    title="Gráfico das funções f(X), h(X) e c(X)",
+    show_fig=False,
+):
+    pi = points[0]
+    pf = points[-1]
+
+    margin = 0.1 * np.linalg.norm(pf - pi)
+
+    # Calcular o min e max
+    min_x = min(p[0] for p in points)
+    min_y = min(p[1] for p in points)
+    max_x = max(p[0] for p in points)
+    max_y = max(p[1] for p in points)
+
+    margin = 1
+
+    # Definir os limites do gráfico e a discretização
+    x = np.linspace(min_x - margin, max_x + margin, n_points)
+    y = np.linspace(min_y - margin, max_y + margin, n_points)
+
+    # Criar a malha de pontos (grid) para x e y
+    X, Y = np.meshgrid(x, y)
+
+    # Plotagem
+    fig = plt.figure(figsize=(10, 8))
+
+    # Plotar os pontos inicial e final
+    plt.scatter(pi[0], pi[1], color="red", label="Ponto Inicial")
+    plt.scatter(pf[0], pf[1], color="blue", label="Ponto Final")
+
+    # Adicionar legendas aos pontos
+    plt.text(
+        pi[0],
+        pi[1],
+        f"pi [{pi[0]:.2f}, {pi[1]:.2f}]",
+        color="red",
+        fontsize=12,
+        ha="right",
+    )
+    plt.text(
+        pf[0],
+        pf[1],
+        f"pf [{pf[0]:.2f}, {pf[1]:.2f}]",
+        color="blue",
+        fontsize=12,
+        ha="left",
+    )
+
+    # Traçar uma linha ligando os dois pontos
+    for i in range(1, len(points)):
+        p0 = points[i - 1]
+        p1 = points[i]
+        plt.plot(
+            [p0[0], p1[0]],
+            [p0[1], p1[1]],
+            color="green",
+            linestyle="--",
+        )
+
+    # Avaliar f(X)
+    ZF = np.vectorize(lambda x1, x2: f(np.array([x1, x2])))(X, Y)
+    contour = plt.contour(X, Y, ZF, levels=countour_levels, cmap="viridis")
+    plt.clabel(contour, inline=True, fontsize=8)
+
+    # Plotar cada função em h_list
+    for i, h in enumerate(h_list, start=1):
+        ZH = np.vectorize(lambda x1, x2: h(np.array([x1, x2])))(X, Y)
+        plt.contour(
+            X,
+            Y,
+            ZH,
+            levels=[0],
+            colors="yellow",
+            linestyles="--",
+            linewidths=1.2,
+        )
+
+    # Criar a região viável para c_list
+    viable_region = np.ones_like(X, dtype=bool)  # Inicialmente, toda a região é viável
+    for c in c_list:
+        ZC = np.vectorize(lambda x1, x2: c(np.array([x1, x2])))(X, Y)
+        viable_region &= ZC <= 0
+
+    # Preencher a região viável
+    plt.contourf(X, Y, viable_region, levels=[0.5, 1], colors=["#ff9999"], alpha=0.4)
+    plt.contour(
+        X, Y, viable_region, levels=[0.5], colors="red", linestyles="-", linewidths=1
+    )
+
+    # Configuração do gráfico
+    plt.title(title)
+    plt.xlabel("x1")
+    plt.ylabel("x2")
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
+
+    # Mostrar o gráfico
+    if show_fig:
+        plt.show()
+
+    return fig
+
+
 def plot_images(figuras: list[np.ndarray]):
     # Criação da figura principal com 2 linhas e 3 colunas de subplots
-    fig, axs = plt.subplots(2, 3, figsize=(15, 10))
+    fig, axs = plt.subplots(2, 3, figsize=__fig_size)
 
     # Loop para desenhar cada subfigura na grade
     for i, figura in enumerate(figuras):
@@ -167,3 +393,34 @@ def plot_images(figuras: list[np.ndarray]):
 def show_surface(func, p1, p2, discretization=100, min_point: np.ndarray = None):
     X, Y, Z = get_surface_points(func, p1, p2, discretization)
     plot_surface(X, Y, Z, min_point)
+
+
+def figure_to_image(fig):
+    canvas = FigureCanvas(fig)
+    canvas.draw()
+    return np.frombuffer(canvas.tostring_rgb(), dtype="uint8").reshape(
+        canvas.get_width_height()[::-1] + (3,)
+    )
+
+
+def plot_figs(fig1, fig2, show_fig=False):
+    fig1 = figure_to_image(fig1)
+    fig2 = figure_to_image(fig2)
+    # Criando um subplot com 1 linha e 2 colunas
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))  # 1 linha, 2 colunas
+
+    # Adicionando a primeira imagem
+    axs[0].imshow(fig1, cmap="jet")
+    # axs[0].set_title("Figura 1")  # Título para o primeiro gráfico
+    axs[0].axis("off")  # Remove os eixos
+
+    # Adicionando a segunda imagem
+    axs[1].imshow(fig2, cmap="jet")
+    # axs[1].set_title("Figura 2")  # Título para o segundo gráfico
+    axs[1].axis("off")  # Remove os eixos
+
+    # Ajustando o layout e exibindo
+    plt.tight_layout()
+    if show_fig:
+        plt.show()
+    return fig

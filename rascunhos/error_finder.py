@@ -8,6 +8,7 @@ from optimization.minimize import (
     newton_raphson,
     bfgs,
 )
+from optimization.ploting import plot_curves
 
 
 def f(p: np.ndarray) -> float:
@@ -26,56 +27,91 @@ def hessf(p: np.ndarray) -> np.ndarray:
 
 def main():
     p0 = np.array([2, 2], dtype=float)
-    tol = 1e-5
+    tol = 1e-4
     alfa = 1.0 / 2.0
 
     test_methods(p0, f, gradf, hessf, alfa, tol, 3)
 
 
 def test_methods(p0, f, gradf, hessf, alfa, tol, n_max_steps):
-    univariante(
+    min, points = univariante(
         p0=p0,
         func=f,
         f_grad=gradf,
         alfa=alfa,
-        tol=tol,
+        tol_grad=tol,
+        tol_line=tol / 10,
         verbose=True,
-        monitor=False,
+        monitor=True,
         n_max_steps=n_max_steps,
     )
+    plot_curves(points, f, title="Univariante", show_fig=True)
 
-    powell(
-        p0, f, gradf, alfa, tol, verbose=True, monitor=False, n_max_steps=n_max_steps
-    )
-
-    steepest_descent(
-        p0, f, gradf, alfa, tol, verbose=True, monitor=False, n_max_steps=n_max_steps
-    )
-
-    fletcher_reeves(
+    min, points = powell(
         p0,
         f,
         gradf,
         alfa,
-        tol,
+        tol_grad=tol,
+        tol_line=tol / 10,
         verbose=True,
-        monitor=False,
+        monitor=True,
         n_max_steps=n_max_steps,
     )
+    plot_curves(points, f, title="Powell", show_fig=True)
 
-    newton_raphson(
+    min, points = steepest_descent(
+        p0,
+        f,
+        gradf,
+        alfa,
+        tol_grad=tol,
+        tol_line=tol / 10,
+        verbose=True,
+        monitor=True,
+        n_max_steps=n_max_steps,
+    )
+    plot_curves(points, f, title="Steepest Descent", show_fig=True)
+
+    min, points = fletcher_reeves(
+        p0,
+        f,
+        gradf,
+        alfa,
+        tol_grad=tol,
+        tol_line=tol / 10,
+        verbose=True,
+        monitor=True,
+        n_max_steps=n_max_steps,
+    )
+    plot_curves(points, f, title="Fletcher Reeves", show_fig=True)
+
+    min, points = newton_raphson(
         p0=p0,
         func=f,
         f_grad=gradf,
         f_hess=hessf,
         alfa=alfa,
-        tol=tol,
+        tol_grad=tol,
+        tol_line=tol / 10,
         verbose=True,
-        monitor=False,
+        monitor=True,
         n_max_steps=n_max_steps,
     )
+    plot_curves(points, f, title="Newton Raphson", show_fig=True)
 
-    bfgs(p0, f, gradf, alfa, tol, verbose=True, monitor=False, n_max_steps=n_max_steps)
+    min, points = bfgs(
+        p0,
+        f,
+        gradf,
+        alfa,
+        tol_grad=tol,
+        tol_line=tol / 10,
+        verbose=True,
+        monitor=True,
+        n_max_steps=n_max_steps,
+    )
+    plot_curves(points, f, title="BFGS", show_fig=True)
 
 
 if __name__ == "__main__":

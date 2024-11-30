@@ -24,7 +24,12 @@ from optimization.minimize import (
     newton_raphson,
 )
 from optimization.colors import red as r, green as g, yellow as y, blue as b
-from optimization.ploting import plot_curves, plot_images
+from optimization.ploting import (
+    plot_curves,
+    plot_images,
+    plot_restriction_curves,
+    plot_figs,
+)
 
 # CODE DESCRIPTION FOR THE IMPLEMENTED OCR METHODS
 PENALIDADE = "Penalidade"
@@ -140,15 +145,15 @@ def problema1(
 
     if method == PENALIDADE:
         rp = 0.1
-        beta = 10
+        beta = 10.0
         x0 = np.array([-5.0, -2.0], dtype=np.float64)
         return rp, beta, x0, f, grad_f, hess_f, [], [], [], [c], [grad_c], [hess_c]
 
     if method == BARREIRA:
-        rp = 0.1
-        beta = 10
+        rb = 10.0
+        beta = 0.1
         x0 = np.array([-5.0, -2.0], dtype=np.float64)
-        return rp, beta, x0, f, grad_f, hess_f, [], [], [], [c], [grad_c], [hess_c]
+        return rb, beta, x0, f, grad_f, hess_f, [], [], [], [c], [grad_c], [hess_c]
 
     raise NotImplementedError
 
@@ -200,80 +205,109 @@ def problema3() -> tuple[Callable, list[Callable], list[Callable]]:
 
 
 def main():
-    method = PENALIDADE
-    tol = 1e-6
+    method = PENALIDADE  # PENALIDADE ou BARREIRA
     show_fig = True
     min_verbose = True
-    rp, beta, x0, f, grad_f, hess_f, hs, grad_hs, hess_hs, cs, grad_cs, hess_cs = (
-        problema1(method)
-    )
+    (
+        r_method,
+        beta,
+        x0,
+        f,
+        grad_f,
+        hess_f,
+        hs,
+        grad_hs,
+        hess_hs,
+        cs,
+        grad_cs,
+        hess_cs,
+    ) = problema1(method)
 
-    # uni_min = OCR(
-    #     x0,
-    #     rp,
-    #     beta,
-    #     f,
-    #     grad_f,
-    #     hess_f,
-    #     hs,
-    #     grad_hs,
-    #     hess_hs,
-    #     cs,
-    #     grad_cs,
-    #     hess_cs,
-    #     UNIVARIANTE,
-    #     minimizer,
-    #     ocr_method=method,
-    #     alfa=0.001,
-    #     tol=tol,
-    #     show_fig=show_fig,
-    #     min_verbose=min_verbose,
-    # )
-    # pow_min = OCR(
-    #     x0,
-    #     rp,
-    #     beta,
-    #     f,
-    #     grad_f,
-    #     hess_f,
-    #     hs,
-    #     grad_hs,
-    #     hess_hs,
-    #     cs,
-    #     grad_cs,
-    #     hess_cs,
-    #     POWELL,
-    #     minimizer,
-    #     ocr_method=method,
-    #     alfa=0.1,
-    #     tol=tol,
-    #     show_fig=show_fig,
-    #     min_verbose=min_verbose,
-    # )
-    # ste_min = OCR(
-    #     x0,
-    #     rp,
-    #     beta,
-    #     f,
-    #     grad_f,
-    #     hess_f,
-    #     hs,
-    #     grad_hs,
-    #     hess_hs,
-    #     cs,
-    #     grad_cs,
-    #     hess_cs,
-    #     STEEPEST_DESCENT,
-    #     minimizer,
-    #     ocr_method=method,
-    #     alfa=0.5,
-    #     tol=tol,
-    #     show_fig=show_fig,
-    #     min_verbose=min_verbose,
-    # )
+    start_time = datetime.now()
+    uni_min = OCR(
+        x0,
+        r_method,
+        beta,
+        f,
+        grad_f,
+        hess_f,
+        hs,
+        grad_hs,
+        hess_hs,
+        cs,
+        grad_cs,
+        hess_cs,
+        UNIVARIANTE,
+        minimizer,
+        ocr_method=method,
+        alfa=0.1,
+        tol_ocr=1e-6,
+        tol_grad=1e-3,
+        tol_line=1e-9,
+        max_steps_min=1000,
+        show_fig=show_fig,
+        min_verbose=min_verbose,
+    )
+    time_uni = datetime.now() - start_time
+
+    start_time = datetime.now()
+    pow_min = OCR(
+        x0,
+        r_method,
+        beta,
+        f,
+        grad_f,
+        hess_f,
+        hs,
+        grad_hs,
+        hess_hs,
+        cs,
+        grad_cs,
+        hess_cs,
+        POWELL,
+        minimizer,
+        ocr_method=method,
+        alfa=0.1,
+        tol_ocr=1e-6,
+        tol_grad=1e-4,
+        tol_line=1e-6,
+        max_steps_min=250,
+        show_fig=show_fig,
+        min_verbose=min_verbose,
+    )
+    time_pow = datetime.now() - start_time
+
+    start_time = datetime.now()
+    ste_min = OCR(
+        x0,
+        r_method,
+        beta,
+        f,
+        grad_f,
+        hess_f,
+        hs,
+        grad_hs,
+        hess_hs,
+        cs,
+        grad_cs,
+        hess_cs,
+        STEEPEST_DESCENT,
+        minimizer,
+        ocr_method=method,
+        alfa=0.1,
+        tol_ocr=1e-4,
+        tol_grad=1e-4,
+        tol_line=1e-6,
+        max_steps_min=20,
+        show_fig=show_fig,
+        min_verbose=min_verbose,
+    )
+    time_ste = datetime.now() - start_time
+
+    start_time = datetime.now()
     fle_min = OCR(
         x0,
-        rp,
+        r_method,
         beta,
         f,
         grad_f,
@@ -287,128 +321,78 @@ def main():
         FLETCHER_REEVES,
         minimizer,
         ocr_method=method,
-        alfa=0.001,
-        tol=tol,
+        alfa=0.1,
+        tol_ocr=1e-3,
+        tol_grad=1e-4,
+        tol_line=1e-6,
+        max_steps_min=20,
         show_fig=show_fig,
         min_verbose=min_verbose,
-    )
-    # new_min = OCR(
-    #     x0,
-    #     rp,
-    #     beta,
-    #     f,
-    #     grad_f,
-    #     hess_f,
-    #     hs,
-    #     grad_hs,
-    #     hess_hs,
-    #     cs,
-    #     grad_cs,
-    #     hess_cs,
-    #     NEWTON_RAPHSON,
-    #     minimizer,
-    #     ocr_method=method,
-    #     alfa=0.001,
-    #     tol=tol,
-    #     show_fig=show_fig,
-    #     min_verbose=min_verbose,
-    # )
-    # bfgs_min = OCR(
-    #     x0,
-    #     rp,
-    #     beta,
-    #     f,
-    #     grad_f,
-    #     hess_f,
-    #     hs,
-    #     grad_hs,
-    #     hess_hs,
-    #     cs,
-    #     grad_cs,
-    #     hess_cs,
-    #     BFGS,
-    #     minimizer,
-    #     ocr_method=method,
-    #     alfa=0.001,
-    #     tol=tol,
-    #     show_fig=show_fig,
-    #     min_verbose=min_verbose,
-    # )
-
-    print(f"Resultados para OCR com método: {method}")
-    # print(f"{method} {UNIVARIANTE}:      {uni_min}")
-    # print(f"{method} {POWELL}:           {pow_min}")
-    # print(f"{method} {STEEPEST_DESCENT}: {ste_min}")
-    print(f"{method} {FLETCHER_REEVES}:  {fle_min}")
-    # print(f"{method} {NEWTON_RAPHSON}:   {new_min}")
-    # print(f"{method} {BFGS}:             {bfgs_min}")
-
-
-# IMPLEMENTAR ESSA ABORDAGEM NESSE CÓDIGO
-def methods(
-    p0: np.ndarray,
-    func: Callable,
-    func_grad: Callable,
-    func_hess: Callable,
-    show_curves=False,
-):
-    start_time = datetime.now()
-    min_uni, points_uni = univariante(p0, func, func_grad, verbose=False, monitor=True)
-    time_uni = datetime.now() - start_time
-
-    start_time = datetime.now()
-    min_pow, points_pow = powell(p0, func, func_grad, verbose=False, monitor=True)
-    time_pow = datetime.now() - start_time
-
-    start_time = datetime.now()
-    min_ste, points_ste = steepest_descent(
-        p0, func, func_grad, verbose=False, monitor=True
-    )
-    time_ste = datetime.now() - start_time
-
-    start_time = datetime.now()
-    min_fle, points_fle = fletcher_reeves(
-        p0, func, func_grad, verbose=False, monitor=True
     )
     time_fle = datetime.now() - start_time
 
     start_time = datetime.now()
-    min_bfgs, points_bfgs = bfgs(p0, func, func_grad, verbose=False, monitor=True)
+    new_min = OCR(
+        x0,
+        r_method,
+        beta,
+        f,
+        grad_f,
+        hess_f,
+        hs,
+        grad_hs,
+        hess_hs,
+        cs,
+        grad_cs,
+        hess_cs,
+        NEWTON_RAPHSON,
+        minimizer,
+        ocr_method=method,
+        alfa=0.1,
+        tol_ocr=1e-5,
+        tol_grad=1e-3,
+        tol_line=1e-5,
+        max_steps_min=10,
+        show_fig=show_fig,
+        min_verbose=min_verbose,
+    )
     time_bfgs = datetime.now() - start_time
 
     start_time = datetime.now()
-    min_rap, points_rap = newton_raphson(
-        p0, func, func_grad, func_hess, verbose=False, monitor=True
+    bfgs_min = OCR(
+        x0,
+        r_method,
+        beta,
+        f,
+        grad_f,
+        hess_f,
+        hs,
+        grad_hs,
+        hess_hs,
+        cs,
+        grad_cs,
+        hess_cs,
+        BFGS,
+        minimizer,
+        ocr_method=method,
+        alfa=0.1,
+        tol_ocr=1e-6,
+        tol_grad=1e-5,
+        tol_line=1e-6,
+        max_steps_min=300,
+        show_fig=show_fig,
+        min_verbose=min_verbose,
     )
     time_rap = datetime.now() - start_time
 
-    print(
-        f"Univariante:      [{min_uni[0]:<22}, {min_uni[1]:<22}] f={func(min_uni):<23} passos={len(points_uni)-1:>4} tempo={g(time_uni):>14}"
-    )
-    print(
-        f"Powell:           [{min_pow[0]:<22}, {min_pow[1]:<22}] f={func(min_pow):<23} passos={len(points_pow)-1:>4} tempo={g(time_pow):>14}"
-    )
-    print(
-        f"Steepest Descent: [{min_ste[0]:<22}, {min_ste[1]:<22}] f={func(min_ste):<23} passos={len(points_ste)-1:>4} tempo={g(time_ste):>14}"
-    )
-    print(
-        f"Fletcher Reeves:  [{min_fle[0]:<22}, {min_fle[1]:<22}] f={func(min_fle):<23} passos={len(points_fle):>4} tempo={g(time_fle):>14}"
-    )
-    print(
-        f"BFGS:             [{min_bfgs[0]:<22}, {min_bfgs[1]:<22}] f={func(min_bfgs):<23} passos={len(points_bfgs):>4} tempo={g(time_bfgs):>14}"
-    )
-    print(
-        f"Newton Raphson:   [{min_rap[0]:<22}, {min_rap[1]:<22}] f={func(min_rap):<23} passos={len(points_rap):>4} tempo={g(time_rap):>14}"
-    )
-
-    if show_curves:
-        uni_fig = plot_curves(points_uni, func, title="Univariante")
-        pow_fig = plot_curves(points_pow, func, title="Powell")
-        ste_fig = plot_curves(points_ste, func, title="Steepest Descent")
-        fle_fig = plot_curves(points_fle, func, title="Fletcher Reeves")
-        bfgs_fig = plot_curves(points_bfgs, func, title="BFGS")
-        rap_fig = plot_curves(points_rap, func, title="Newton Raphson")
-        plot_images([uni_fig, pow_fig, ste_fig, fle_fig, bfgs_fig, rap_fig])
+    # TODO: Adicionar o número de passos na análise
+    print(f"Resultados para OCR com método: {y(method)}")
+    print(f"{method} {UNIVARIANTE}:      {uni_min}, tempo: {g(time_uni)}")
+    print(f"{method} {POWELL}:           {pow_min}, tempo: {g(time_pow)}")
+    print(f"{method} {STEEPEST_DESCENT}: {ste_min}, tempo: {g(time_ste)}")
+    print(f"{method} {FLETCHER_REEVES}:  {fle_min}, tempo: {g(time_fle)}")
+    print(f"{method} {NEWTON_RAPHSON}:   {new_min}, tempo: {g(time_bfgs)}")
+    print(f"{method} {BFGS}:             {bfgs_min}, tempo: {g(time_rap)}")
 
 
 def minimizer(
@@ -418,7 +402,9 @@ def minimizer(
     func_grad: Callable,
     func_hess: Callable,
     alfa: float,
-    tol: float,
+    tol_grad: float,
+    tol_line: float,
+    n_max_steps: int = 1000,
     verbose: bool = False,
 ) -> np.ndarray | NotImplementedError:
     """
@@ -443,8 +429,9 @@ def minimizer(
             func,
             func_grad,
             alfa,
-            tol,
-            n_max_steps=1000,
+            tol_grad,
+            tol_line,
+            n_max_steps=n_max_steps,
             verbose=verbose,
             monitor=True,
         )
@@ -455,8 +442,9 @@ def minimizer(
             func,
             func_grad,
             alfa,
-            tol,
-            n_max_steps=1000,
+            tol_grad,
+            tol_line,
+            n_max_steps=n_max_steps,
             verbose=verbose,
             monitor=True,
         )
@@ -467,8 +455,9 @@ def minimizer(
             func,
             func_grad,
             alfa,
-            tol,
-            n_max_steps=1000,
+            tol_grad,
+            tol_line,
+            n_max_steps=n_max_steps,
             verbose=verbose,
             monitor=True,
         )
@@ -479,8 +468,9 @@ def minimizer(
             func,
             func_grad,
             alfa,
-            tol,
-            n_max_steps=1000,
+            tol_grad,
+            tol_line,
+            n_max_steps=n_max_steps,
             verbose=verbose,
             monitor=True,
         )
@@ -491,21 +481,23 @@ def minimizer(
             func,
             func_grad,
             alfa,
-            tol,
-            n_max_steps=1000,
+            tol_grad,
+            tol_line,
+            n_max_steps=n_max_steps,
             verbose=verbose,
             monitor=True,
         )
 
     if method == NEWTON_RAPHSON:
         return newton_raphson(
-            p0,
-            func,
-            func_grad,
-            func_hess,
-            alfa,
-            tol,
-            n_max_steps=1000,
+            p0=p0,
+            func=func,
+            f_grad=func_grad,
+            f_hess=func_hess,
+            alfa=alfa,
+            tol_grad=tol_grad,
+            tol_line=tol_line,
+            n_max_steps=n_max_steps,
             verbose=verbose,
             monitor=True,
         )
@@ -515,7 +507,7 @@ def minimizer(
 
 def OCR(
     x0: np.ndarray,
-    rp: float,
+    r_method: float,
     beta: float,
     f: Callable,
     func_grad: Callable,
@@ -530,102 +522,166 @@ def OCR(
     minimizer: Callable,
     ocr_method: str,
     alfa: float,
-    tol: float,
+    tol_ocr: float,
+    tol_grad: float,
+    tol_line: float,
+    max_steps_ocr: int = 20,
+    max_steps_min: int = 1000,
     show_fig=False,
     min_verbose=False,
 ):
-    if beta <= 1:
+    if ocr_method == PENALIDADE and beta <= 1:
         raise Exception(r("beta deve ser maior que 1"))
+    if ocr_method == BARREIRA and beta <= 0:
+        raise Exception(r("beta deve ser maior que 0"))
 
     print(y(f" -> Inicializando OCR com {min_method}"))
 
-    # TODO: utilização ou não da restrição de desigualdade por vetores
-    def p(x: np.ndarray) -> float:
-        """Função penalidade"""
-        return sum(h(x) ** 2 for h in hs) + sum(max(0.0, c(x)) ** 2 for c in cs)
-
-    def grad_p(x: np.ndarray) -> np.ndarray:
-        """Gradiente da função penalidade"""
-        igualdade = 0.0
-        for h, grad_h in zip(hs, grad_hs):
-            igualdade += 2.0 * h(x) * grad_h(x)
-
-        desigualdade = 0.0
-        for c, grad_c in zip(cs, grad_cs):
-            desigualdade += 2.0 * max(0.0, c(x)) * grad_c(x)
-
-        return igualdade + desigualdade
-
-    def hess_p(x: np.ndarray) -> np.ndarray:
-        """Hessiana da função penalidade"""
-        igualdade = 0.0
-        for h, grad_h, hess_h in zip(hs, grad_hs, hess_hs):
-            igualdade += 2.0 * h(x) * hess_h(x) + 2.0 * np.outer(grad_h(x), grad_h(x))
-
-        desigualdade = 0.0
-        for c, grad_c, hess_c in zip(cs, grad_cs, hess_cs):
-            desigualdade += 2.0 * max(0.0, c(x)) * hess_c(x) + 2.0 * np.outer(
-                grad_c(x), grad_c(x)
-            )
-
-        return igualdade + desigualdade
-
-    # print(f"p({x0}) = {p(x0)}")
-    # print(f"grad_p({x0}) = {grad_p(x0)}")
-    # print(f"hess_p({x0}) = {hess_p(x0)}")
-
     x_buff = x0
-    rp_buff = rp
-    __n_max_iter = 20
+    r_buff = r_method
+    alfa_buff = alfa
 
     i = 0
     while True:
+        # hs_indexes = np.where(np.array([h(x_buff) for h in hs]) != 0)[0]
+        cs_indexes = np.argwhere(
+            np.array([max(0, c(x_buff)) for c in cs]) > 0
+        ).flatten()
+
+        if len(cs_indexes) == 0:
+            print(b(f"Ponto {x_buff} interno da restrição de desigualdade"))
+
+        def p(x: np.ndarray) -> float:
+            """Função penalidade"""
+            igualdade = sum(h(x) ** 2 for h in hs)
+
+            if ocr_method == PENALIDADE:
+                desigualdade = sum(cs[idx](x) ** 2 for idx in cs_indexes)
+
+            if ocr_method == BARREIRA:
+                desigualdade = sum(-(cs[idx](x) ** -1) for idx in cs_indexes)
+
+            return igualdade + desigualdade
+
+        def grad_p(x: np.ndarray) -> np.ndarray:
+            """Gradiente da função penalidade"""
+            igualdade = np.zeros(x.shape, dtype=np.float64)
+            for h, grad_h in zip(hs, grad_hs):
+                igualdade += h(x) * grad_h(x)
+
+            desigualdade = np.zeros(x.shape, dtype=np.float64)
+            if ocr_method == PENALIDADE:
+                for idx in cs_indexes:
+                    desigualdade += 2 * cs[idx](x) * grad_cs[idx](x)
+
+            if ocr_method == BARREIRA:
+                for idx in cs_indexes:
+                    desigualdade += cs[idx](x) ** -2
+
+            return igualdade + desigualdade
+
+        def hess_p(x: np.ndarray) -> np.ndarray:
+            """Hessiana da função penalidade"""
+            igualdade = np.zeros((2, 2), dtype=np.float64)
+            for h, grad_h, hess_h in zip(hs, grad_hs, hess_hs):
+                igualdade += h(x) * hess_h(x) + np.outer(grad_h(x), grad_h(x))
+
+            desigualdade = np.zeros((2, 2), dtype=np.float64)
+            if ocr_method == PENALIDADE:
+                for idx in cs_indexes:
+                    desigualdade += cs[idx](x) * hess_cs[idx](x) + np.outer(
+                        grad_cs[idx](x), grad_cs[idx](x)
+                    )
+
+            if ocr_method == BARREIRA:
+                for idx in cs_indexes:
+                    desigualdade += -2 * (cs[idx](x) ** -3)
+
+            return igualdade + desigualdade
+
         # Definir pseudo função objetivo
         def fi(x: np.ndarray):
-            return f(x) + (1.0 / 2.0) * rp_buff * p(x)
+            return f(x) + (1 / 2) * r_buff * p(x)
 
         def grad_fi(x: np.ndarray):
-            return func_grad(x) + (1.0 / 2.0) * rp_buff * grad_p(x)
+            return func_grad(x) + (1 / 2) * r_buff * grad_p(x)
 
         def hess_fi(x: np.ndarray):
-            return func_hess(x) + (1.0 / 2.0) * rp_buff * hess_p(x)
+            return func_hess(x) + r_buff * hess_p(x)
 
         # Minimizar a pseudo função objetivo utilizando OSR
         x_min, points = minimizer(
-            min_method, x_buff, fi, grad_fi, hess_fi, alfa, tol, min_verbose
+            method=min_method,
+            x=x_buff,
+            f=fi,
+            func_grad=grad_fi,
+            func_hess=hess_fi,
+            alfa=alfa_buff,
+            tol_grad=tol_grad,
+            tol_line=tol_line,
+            n_max_steps=max_steps_min,
+            verbose=min_verbose,
         )
+        # Implementando alfa adaptativo para BARREIRA
+        if ocr_method == BARREIRA:
+            k = np.argwhere(np.array([max(0, c(x_min)) for c in cs]) > 0).flatten()
+            """
+            caso k seja vazio, o ponto está dentro da região da restrição
+            caso contrário, o ponto está fora da região da restrição
+            se estiver fora da região de restrição, siginifica que o alfa é muito grande
+            e deve ser reduzido
+            """
+            if not len(k) == 0:  # saiu da região
+                alfa_buff = alfa_buff / 10
+                print(f"Alfa adaptativo: {alfa_buff} " f"x_min: {x_min}")
+                continue
+            else:
+                alfa_buff = alfa
 
-        # Verificar convergência
-        conv_value = (1.0 / 2.0) * rp_buff * p(x_min)
+        # Contabilizando iterações
+        i += 1
+
+        # Analisando convergência
+        conv_value = r_buff * p(x_min)
         print(
-            f"Iteração {g(f'{i+1:>3}')}: "
+            f"Iteração {g(f'{i:>3}')}: "
             f"Critério de convergência: {conv_value:<22} "
-            f"mínimo: {x_min[0]:<22}, {x_min[1]:<22} "
-            f"n_passos {min_method}: {y(len(points)-1):>5}"
+            f"mínimo: [{x_min[0]:>22}, {x_min[1]:>22}] "
+            f"n_passos: {min_method}: {y(len(points)-1):>5}"
         )
-
         if show_fig:
-            plot_curves(
+            fig_fi = plot_curves(
                 points,
                 fi,
-                title=f"Pseudo função objetivo {i+1} - metodo: {min_method} rp: {rp_buff}",
-                show_fig=True,
+                title=f"Pseudo função objetivo {i} - metodo: {min_method} r: {r_buff}",
+                show_fig=False,
             )
-        # print(f"Mínimo encontrado: {x_min}")
+            fig_ocr = plot_restriction_curves(
+                points,
+                fi,
+                hs,
+                cs,
+                show_fig=False,
+                title=f"Gráfico de f(x), h(x) e c(x) passo {i} OCR - metodo: {min_method} r: {r_buff}",
+            )
+            fig_ocr.savefig(f"ocr_{ocr_method}_{min_method}_{i}.png")
+            # fig_result = plot_figs(fig_fi, fig_ocr, show_fig=False)
+            # fig_result.savefig(f"ocr_{ocr_method}_{min_method}_{i}.png")
 
-        if abs(conv_value) < tol:
+        # Atualizar rp
+        r_buff = beta * r_buff
+        x_buff = x_min
+
+        if abs(conv_value) < tol_ocr:
+            if len(cs_indexes) == 0:
+                continue
             print(
-                f"Convergência para {y(min_method)} atingida com niter={y(__n_max_iter)}"
+                f"Convergência para OCR com {y(min_method)} atingida com niter={y(i)}"
             )
             return x_min
 
-        # Atualizar rp
-        rp_buff = beta * rp_buff
-        x_buff = x_min
-        i += 1
-
         # Evitando loop infinito
-        if i == __n_max_iter:
+        if i == max_steps_ocr:
             raise Exception(r("Número máximo de iterações atingido"))
 
 
