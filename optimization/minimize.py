@@ -43,7 +43,7 @@ def univariante(
         grad_norm = np.linalg.norm(f_grad(next_p))
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]:>23}, {next_p[1]:>23})={func(next_p):>23}"
+                f"Passo {g(i+1)}: f({next_p[0]:>23}, {next_p[1]:>23}) = {func(next_p):>23} "
                 f"norm gradient={grad_norm:>23}"
             )
 

@@ -280,7 +280,7 @@ def plot_restriction_curves(
     max_x = max(p[0] for p in points)
     max_y = max(p[1] for p in points)
 
-    margin = 1
+    # margin = 1
 
     # Definir os limites do gráfico e a discretização
     x = np.linspace(min_x - margin, max_x + margin, n_points)
