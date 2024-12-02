@@ -346,58 +346,257 @@ def problema3(
         Hessiana das restrições de desigualdade
     """
 
+    pi = math.pi
+    P = 33e3
+    E = 3e7
+    sigma_y = 1e5
+    ro = 0.3
+    B = 30.0
+    t = 0.1
+
     def f(x: np.ndarray) -> float:
         """Função objetivo"""
         x1 = x[0]
         x2 = x[1]
-        ro = 0.3
-        pi = math.pi
-        B = 30
-        P = 33e3
-        t = 0.1
-        E = 3e7
-        escoamento = 1e5
-        return 
+        d = x1
+        H = x2
+        return 2 * ro * pi * d * t * (H**2 + B**2) ** (1 / 2)
 
     def grad_f(x: np.ndarray) -> np.ndarray:
         """Gradiente da função objetivo"""
         x1 = x[0]
         x2 = x[1]
+
+        # COM VÁRIÁVEIS
+        # return np.array(
+        #     [
+        #         2 * pi * ro * t * (B**2 + x2**2) ** 0.5,
+        #         2.0 * pi * ro * t * x1 * x2 / (B**2 + x2**2) ** 0.5,
+        #     ],
+        #     dtype=np.float64,
+        # )
+        # SEM VARIÁVEIS
         return np.array(
-            [,], dtype=np.float64
+            [
+                5.65486677646163 * (0.00111111111111111 * x2**2 + 1) ** 0.5,
+                0.00628318530717959
+                * x1
+                * x2
+                / (0.00111111111111111 * x2**2 + 1) ** 0.5,
+            ],
+            dtype=np.float64,
         )
 
     def hess_f(x: np.ndarray) -> np.ndarray:
         """Hessiana da função objetivo"""
         x1 = x[0]
-        return np.array([[, ], [, ]], dtype=np.float64)
+        x2 = x[1]
+        # return np.array(
+        #     [
+        #         [0, 2.0 * pi * ro * t * x2 / (B**2 + x2**2) ** 0.5],
+        #         [
+        #             2.0 * pi * ro * t * x2 / (B**2 + x2**2) ** 0.5,
+        #             -2.0 * pi * ro * t * x1 * x2**2 / (B**2 + x2**2) ** 1.5
+        #             + 2.0 * pi * ro * t * x1 / (B**2 + x2**2) ** 0.5,
+        #         ],
+        #     ],
+        #     dtype=np.float64,
+        # )
+        return np.array(
+            [
+                [
+                    0,
+                    0.00628318530717959 * x2 / (0.00111111111111111 * x2**2 + 1) ** 0.5,
+                ],
+                [
+                    0.00628318530717959 * x2 / (0.00111111111111111 * x2**2 + 1) ** 0.5,
+                    -6.98131700797732e-6
+                    * x1
+                    * x2**2
+                    / (0.00111111111111111 * x2**2 + 1) ** 1.5
+                    + 0.00628318530717959
+                    * x1
+                    / (0.00111111111111111 * x2**2 + 1) ** 0.5,
+                ],
+            ],
+            np.float64,
+        )
 
-    def c(x: np.ndarray) -> float:
+    def c1(x: np.ndarray) -> float:
         """Restrição de desigualdade"""
         x1 = x[0]
         x2 = x[1]
-        return 
+        d = x1
+        H = x2
+        return P * (H**2 + B**2) ** (1 / 2) / (pi * d * t * H) - sigma_y
 
-    def grad_c(x: np.ndarray) -> np.ndarray:
+    def grad_c1(x: np.ndarray) -> np.ndarray:
         """Gradiente da restrição de desigualdade"""
         x1 = x[0]
-        return np.array([, ], dtype=np.float64)
+        x2 = x[1]
+        return np.array(
+            [
+                -3151267.87321953
+                * (0.00111111111111111 * x2**2 + 1) ** 0.5
+                / (x1**2 * x2),
+                3501.4087480217 / (x1 * (0.00111111111111111 * x2**2 + 1) ** 0.5)
+                - 3151267.87321953
+                * (0.00111111111111111 * x2**2 + 1) ** 0.5
+                / (x1 * x2**2),
+            ],
+            dtype=np.float64,
+        )
 
-    def hess_c(x: np.ndarray) -> np.ndarray:
+    def hess_c1(x: np.ndarray) -> np.ndarray:
         """Hessiana da restrição de desigualdade"""
-        return np.array([[, ], [, ]], dtype=np.float64)
+        x1 = x[0]
+        x2 = x[1]
+        return np.array(
+            [
+                [
+                    6302535.74643906
+                    * (0.00111111111111111 * x2**2 + 1) ** 0.5
+                    / (x1**3 * x2),
+                    -3501.4087480217
+                    / (x1**2 * (0.00111111111111111 * x2**2 + 1) ** 0.5)
+                    + 3151267.87321953
+                    * (0.00111111111111111 * x2**2 + 1) ** 0.5
+                    / (x1**2 * x2**2),
+                ],
+                [
+                    -3501.4087480217
+                    / (x1**2 * (0.00111111111111111 * x2**2 + 1) ** 0.5)
+                    + 3151267.87321953
+                    * (0.00111111111111111 * x2**2 + 1) ** 0.5
+                    / (x1**2 * x2**2),
+                    -3.89045416446855
+                    * x2
+                    / (x1 * (0.00111111111111111 * x2**2 + 1) ** 1.5)
+                    - 3501.4087480217
+                    / (x1 * x2 * (0.00111111111111111 * x2**2 + 1) ** 0.5)
+                    + 6302535.74643906
+                    * (0.00111111111111111 * x2**2 + 1) ** 0.5
+                    / (x1 * x2**3),
+                ],
+            ],
+            dtype=np.float64,
+        )
+
+    def c2(x: np.ndarray) -> float:
+        x1 = x[0]
+        x2 = x[1]
+        d = x1
+        H = x2
+        return P * (H**2 + B**2) ** (1 / 2) / (pi * d * t * H) - pi**2 * E * (
+            d**2 + t**2
+        ) / (8 * (H**2 + B**2))
+
+    def grad_c2(x: np.ndarray) -> np.ndarray:
+        x1 = x[0]
+        x2 = x[1]
+        d = x1
+        H = x2
+        return np.array(
+            [
+                -592176264.065361 * x1 / (8 * x2**2 + 7200.0)
+                - 3151267.87321953
+                * (0.00111111111111111 * x2**2 + 1) ** 0.5
+                / (x1**2 * x2),
+                3.08641975308642e-7
+                * x2
+                * (296088132.032681 * x1**2 + 2960881.32032681)
+                / (0.00111111111111111 * x2**2 + 1) ** 2
+                + 3501.4087480217 / (x1 * (0.00111111111111111 * x2**2 + 1) ** 0.5)
+                - 3151267.87321953
+                * (0.00111111111111111 * x2**2 + 1) ** 0.5
+                / (x1 * x2**2),
+            ],
+            dtype=np.float64,
+        )
+
+    def hess_c2(x: np.ndarray) -> np.ndarray:
+        x1 = x[0]
+        x2 = x[1]
+        d = x1
+        H = x2
+        return np.array(
+            [
+                [
+                    -592176264.065361 / (8 * x2**2 + 7200.0)
+                    + 6302535.74643906
+                    * (0.00111111111111111 * x2**2 + 1) ** 0.5
+                    / (x1**3 * x2),
+                    182.770451872025 * x1 * x2 / (0.00111111111111111 * x2**2 + 1) ** 2
+                    - 3501.4087480217
+                    / (x1**2 * (0.00111111111111111 * x2**2 + 1) ** 0.5)
+                    + 3151267.87321953
+                    * (0.00111111111111111 * x2**2 + 1) ** 0.5
+                    / (x1**2 * x2**2),
+                ],
+                [
+                    182.770451872025 * x1 * x2 / (0.00111111111111111 * x2**2 + 1) ** 2
+                    - 3501.4087480217
+                    / (x1**2 * (0.00111111111111111 * x2**2 + 1) ** 0.5)
+                    + 3151267.87321953
+                    * (0.00111111111111111 * x2**2 + 1) ** 0.5
+                    / (x1**2 * x2**2),
+                    -1.37174211248285e-9
+                    * x2**2
+                    * (296088132.032681 * x1**2 + 2960881.32032681)
+                    / (0.00111111111111111 * x2**2 + 1) ** 3
+                    + 3.08641975308642e-7
+                    * (296088132.032681 * x1**2 + 2960881.32032681)
+                    / (0.00111111111111111 * x2**2 + 1) ** 2
+                    - 3.89045416446855
+                    * x2
+                    / (x1 * (0.00111111111111111 * x2**2 + 1) ** 1.5)
+                    - 3501.4087480217
+                    / (x1 * x2 * (0.00111111111111111 * x2**2 + 1) ** 0.5)
+                    + 6302535.74643906
+                    * (0.00111111111111111 * x2**2 + 1) ** 0.5
+                    / (x1 * x2**3),
+                ],
+            ],
+            dtype=np.float64,
+        )
 
     if method == PENALIDADE:
         rp = 1e-7
         beta = 10.0
         x0 = np.array([1.0, 15.0], dtype=np.float64)
-        return rp, beta, x0, f, grad_f, hess_f, [], [], [], [c], [grad_c], [hess_c]
+        return (
+            rp,
+            beta,
+            x0,
+            f,
+            grad_f,
+            hess_f,
+            [],
+            [],
+            [],
+            [c1, c2],
+            [grad_c1, grad_c2],
+            [hess_c1, hess_c2],
+        )
 
     if method == BARREIRA:
         rb = 1e7
         beta = 0.1
         x0 = np.array([4.0, 25.0], dtype=np.float64)
-        return rb, beta, x0, f, grad_f, hess_f, [], [], [], [c], [grad_c], [hess_c]
+        return (
+            rb,
+            beta,
+            x0,
+            f,
+            grad_f,
+            hess_f,
+            [],
+            [],
+            [],
+            [c1, c2],
+            [grad_c1, grad_c2],
+            [hess_c1, hess_c2],
+        )
 
     raise NotImplementedError
 
@@ -419,7 +618,7 @@ def main():
         cs,
         grad_cs,
         hess_cs,
-    ) = problema2(method)
+    ) = problema3(method)
 
     start_time = datetime.now()
     uni_min = OCR(
@@ -438,10 +637,10 @@ def main():
         UNIVARIANTE,
         minimizer,
         ocr_method=method,
-        alfa=0.1,
-        tol_ocr=1e-6,
+        alfa=0.001,
+        tol_ocr=1e-4,
         tol_grad=1e-3,
-        tol_line=1e-9,
+        tol_line=1e-6,
         max_steps_min=1000,
         show_fig=show_fig,
         min_verbose=min_verbose,
@@ -465,11 +664,11 @@ def main():
         POWELL,
         minimizer,
         ocr_method=method,
-        alfa=0.1,
-        tol_ocr=1e-6,
-        tol_grad=1e-4,
-        tol_line=1e-6,
-        max_steps_min=250,
+        alfa=0.001,
+        tol_ocr=1e-3,
+        tol_grad=1e-3,
+        tol_line=1e-8,
+        max_steps_min=1000,
         show_fig=show_fig,
         min_verbose=min_verbose,
     )
@@ -492,11 +691,11 @@ def main():
         STEEPEST_DESCENT,
         minimizer,
         ocr_method=method,
-        alfa=0.1,
+        alfa=0.001,
         tol_ocr=1e-3,
         tol_grad=1e-4,
-        tol_line=1e-7,
-        max_steps_min=20,
+        tol_line=1e-8,
+        max_steps_min=1000,
         show_fig=show_fig,
         min_verbose=min_verbose,
     )
@@ -519,11 +718,11 @@ def main():
         FLETCHER_REEVES,
         minimizer,
         ocr_method=method,
-        alfa=0.1,
+        alfa=0.01,
         tol_ocr=1e-3,
-        tol_grad=1e-4,
+        tol_grad=1e-5,
         tol_line=1e-6,
-        max_steps_min=20,
+        max_steps_min=100,
         show_fig=show_fig,
         min_verbose=min_verbose,
     )
@@ -574,7 +773,7 @@ def main():
         minimizer,
         ocr_method=method,
         alfa=0.1,
-        tol_ocr=1e-6,
+        tol_ocr=1e-3,
         tol_grad=1e-5,
         tol_line=1e-6,
         max_steps_min=300,
@@ -850,23 +1049,24 @@ def OCR(
             f"n_passos: {min_method}: {y(len(points)-1):>5}"
         )
         if show_fig:
-            fig_fi = plot_curves(
-                points,
-                fi,
-                title=f"Pseudo função objetivo {i} - metodo: {min_method} r: {r_buff}",
-                show_fig=True,
-            )
-            # fig_ocr = plot_restriction_curves(
+            # fig_fi = plot_curves(
             #     points,
             #     fi,
-            #     hs,
-            #     cs,
+            #     title=f"Pseudo função objetivo {i} - metodo: {min_method} r: {r_buff}",
             #     show_fig=True,
-            #     title=f"Gráfico de f(x), h(x) e c(x) passo {i} OCR - metodo: {min_method} r: {r_buff}",
             # )
+            fig_ocr = plot_restriction_curves(
+                points,
+                f,
+                hs,
+                cs,
+                show_fig=True,
+                title=f"Gráfico de f(x), h(x) e c(x) passo {i} OCR - metodo: {min_method} r: {r_buff}",
+            )
             # fig_ocr.savefig(f"ocr_{ocr_method}_{min_method}_{i}.png")
             # fig_result = plot_figs(fig_fi, fig_ocr, show_fig=False)
             # fig_result.savefig(f"ocr_{ocr_method}_{min_method}_{i}.png")
+            pass
 
         # Atualizar rp
         r_buff = beta * r_buff

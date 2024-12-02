@@ -67,57 +67,113 @@ def make_step(p0: np.ndarray, alfa: float, n: np.ndarray):
 #     return aL, aU
 
 
+# def passo_constante(
+#     p0: np.ndarray,
+#     alfa: float,
+#     n: np.ndarray,
+#     func: Callable[[np.ndarray], float],
+#     n_max_step: int = 1000,
+#     verbose: bool = False,
+#     monitor: list[np.ndarray] = None,
+# ) -> np.ndarray:
+#     # TODO: Remover n_max_step da função
+#     if verbose:
+#         print(y("Inicializando Método do Passo Constante"))
+
+#     # Realiza 1 passo para verificar se é necessário inverter a direção
+#     p_check = make_step(p0, 1e-6, n)
+#     f_check = func(p_check)
+#     dir_changed = False
+
+#     if f_check > func(p0):
+#         dir_changed = True
+#         n = -n
+
+#     p_buff = p0
+#     i = 0
+#     while True:
+#         new_alfa = alfa * (i + 1)
+#         # print(f"alfa: {new_alfa}, p: {p_buff}")
+#         p1 = make_step(p0, new_alfa, n)
+
+#         f0 = func(p_buff)
+#         f1 = func(p1)
+
+#         if verbose:
+#             print(f"passo: {g(i+1)}, p_buff: {p_buff}, p1: {p1}")
+
+#         if monitor is not None:
+#             monitor.append(p_buff)
+
+#         if f1 > f0:
+#             result = alfa * (i - 1), alfa * (i + 1)
+#             alfa_min = min(result)
+#             alfa_max = max(result)
+#             if dir_changed:
+#                 alfa_min, alfa_max = -alfa_max, -alfa_min
+#             return alfa_min, alfa_max
+
+#         p_buff = p1
+#         i += 1
+
+#     print(r("Número máximo de passos atingido passo constante."))
+#     return alfa * (i + 1), alfa * i
+
+
 def passo_constante(
-    p0: np.ndarray,
-    alfa: float,
-    n: np.ndarray,
-    func: Callable[[np.ndarray], float],
-    n_max_step: int = 1000,
+    x0: np.ndarray,
+    delta_alpha: float,
+    d: np.ndarray,
+    func: Callable[[np.ndarray, np.ndarray, float], float],
+    eps: float = 1e-6,
     verbose: bool = False,
-    monitor: list[np.ndarray] = None,
-) -> np.ndarray:
-    # TODO: Remover n_max_step da função
-    if verbose:
-        print(y("Inicializando Método do Passo Constante"))
+) -> tuple[float, float]:
+    """
+    Método do Passo Constante adaptado do código MATLAB.
 
-    # Realiza 1 passo para verificar se é necessário inverter a direção
-    p_check = make_step(p0, 1e-10, n)
-    f_check = func(p_check)
-    dir_changed = False
+    Parâmetros:
+    - x0: Ponto inicial (np.ndarray).
+    - d: Direção de busca (np.ndarray).
+    - delta_alpha: Tamanho do passo constante.
+    - func: Função objetivo, que deve aceitar (x0, direção, alpha) como parâmetros.
+    - eps: Tolerância para verificação inicial.
+    - verbose: Exibe informações adicionais durante o cálculo.
 
-    if f_check > func(p0):
-        dir_changed = True
-        n = -n
+    Retorno:
+    - aL: Limite inferior do intervalo alfa.
+    - aU: Limite superior do intervalo alfa.
+    """
+    # Calcula o valor da função no ponto inicial
+    alpha = 0
+    f0 = func(x0)
 
-    p_buff = p0
-    i = 0
+    # Verifica o sentido positivo da busca
+    f1 = func(make_step(x0, eps, d))
+    flag_dir = 1  # Inicialmente direção é positiva
+
+    if f1 > f0:
+        d = -d  # Inverte a direção
+        flag_dir = -1
+
+    # Itera para encontrar os limites do intervalo
     while True:
-        new_alfa = alfa * (i + 1)
-        # print(f"alfa: {new_alfa}, p: {p_buff}")
-        p1 = make_step(p0, new_alfa, n)
+        alpha += delta_alpha
+        f = func(make_step(x0, alpha, d))
+        f_prev = func(make_step(x0, alpha - eps, d))
 
-        f0 = func(p_buff)
-        f1 = func(p1)
+        if f_prev < f:
+            aL = alpha - delta_alpha
+            aU = alpha
+            break
 
-        if verbose:
-            print(f"passo: {g(i+1)}, p_buff: {p_buff}, p1: {p1}")
+    # Ajusta os limites se a direção foi invertida
+    if flag_dir == -1:
+        aL, aU = -aU, -aL
 
-        if monitor is not None:
-            monitor.append(p_buff)
+    if verbose:
+        print(f"aL: {aL}, aU: {aU}")
 
-        if f1 > f0:
-            result = alfa * (i - 1), alfa * (i + 1)
-            alfa_min = min(result)
-            alfa_max = max(result)
-            if dir_changed:
-                alfa_min, alfa_max = -alfa_max, -alfa_min
-            return alfa_min, alfa_max
-
-        p_buff = p1
-        i += 1
-
-    print(r("Número máximo de passos atingido passo constante."))
-    return alfa * (i + 1), alfa * i
+    return aL, aU
 
 
 # def passo_constante(

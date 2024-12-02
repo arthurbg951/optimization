@@ -34,7 +34,8 @@ def univariante(
     for i in range(n_max_steps):
         # i = 0
         # while True:
-        aL, aU = passo_constante(actual_p, alfa, actual_d, func, n_max_step=n_max_steps)
+        # aL, aU = passo_constante(actual_p, alfa, actual_d, func, n_max_step=n_max_steps)
+        aL, aU = passo_constante(actual_p, alfa, actual_d, func)
         a_min = secao_aurea(
             actual_p, actual_d, aL, aU, func, tol_line, n_max_step=n_max_steps
         )
@@ -347,7 +348,7 @@ def bfgs(
     points: list[np.ndarray] = [p0]  # Percurso da minimização
 
     p_atual = np.copy(p0)
-    S = np.eye(len(p0), dtype=np.float32)  # Matriz identidade para o tamanho de p0
+    S = np.eye(len(p0), dtype=np.float64)  # Matriz identidade para o tamanho de p0
 
     # Repetição do gradiente
     n_max_repeated_grad = 5

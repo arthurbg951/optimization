@@ -264,7 +264,7 @@ def plot_restriction_curves(
     f: Callable[[np.ndarray], np.ndarray],
     h_list: list[Callable[[np.ndarray], np.ndarray]],
     c_list: list[Callable[[np.ndarray], np.ndarray]],
-    n_points=1000,
+    n_points=100,
     countour_levels=50,
     title="Gráfico das funções f(X), h(X) e c(X)",
     show_fig=False,
@@ -283,8 +283,10 @@ def plot_restriction_curves(
     # margin = 1
 
     # Definir os limites do gráfico e a discretização
-    x = np.linspace(min_x - margin, max_x + margin, n_points)
-    y = np.linspace(min_y - margin, max_y + margin, n_points)
+    # x = np.linspace(min_x - margin, max_x + margin, n_points)
+    # y = np.linspace(min_y - margin, max_y + margin, n_points)
+    x = np.linspace(0, 10, n_points)
+    y = np.linspace(0, 100, n_points)
 
     # Criar a malha de pontos (grid) para x e y
     X, Y = np.meshgrid(x, y)
@@ -343,17 +345,39 @@ def plot_restriction_curves(
             linewidths=1.2,
         )
 
+    # Lista de cores para as curvas
+    colors = [
+        "blue",
+        "purple",
+        "orange",
+        "cyan",
+        "magenta",
+        "green",
+    ]
+
     # Criar a região viável para c_list
     viable_region = np.ones_like(X, dtype=bool)  # Inicialmente, toda a região é viável
-    for c in c_list:
+
+    for i, c in enumerate(c_list):
         ZC = np.vectorize(lambda x1, x2: c(np.array([x1, x2])))(X, Y)
         viable_region &= ZC <= 0
 
+        # Usar uma cor específica para cada curva
+        plt.contour(
+            X,
+            Y,
+            ZC,
+            levels=[0],
+            colors=colors[i % len(colors)],
+            linestyles="-",
+            linewidths=2,
+        )
+
     # Preencher a região viável
-    plt.contourf(X, Y, viable_region, levels=[0.5, 1], colors=["#ff9999"], alpha=0.4)
-    plt.contour(
-        X, Y, viable_region, levels=[0.5], colors="red", linestyles="-", linewidths=1
-    )
+    # plt.contourf(X, Y, viable_region, levels=[0.5, 1], colors=["#ff9999"], alpha=0.4)
+    # plt.contour(
+    #     X, Y, viable_region, levels=[0.5], colors="red", linestyles="-", linewidths=1
+    # )
 
     # Configuração do gráfico
     plt.title(title)

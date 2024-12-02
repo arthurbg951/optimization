@@ -1,20 +1,30 @@
 import sympy as sp
-import math as m
+import math
 
-d, H = sp.symbols("d H")
+x1, x2 = sp.symbols("x1 x2")
 
-ro = 0.3
-pi = m.pi
-B = 30
+d = x1
+H = x2
+# ro = sp.symbols("ro")
+# B = sp.symbols("B")
+# P = sp.symbols("P")
+# t = sp.symbols("t")
+# E = sp.symbols("E")
+# sigma_y = sp.symbols("sigma_y")
+# pi = sp.symbols("pi")
+
+pi = math.pi
 P = 33e3
-t = 0.1
 E = 3e7
-escoamento = 1e5
+sigma_y = 1e5
+ro = 0.3
+B = 30.0
+t = 0.1
 
-x1 = d
-x2 = H
 
-f = 2 * ro * pi * d * t * sp.sqrt(H**2 + B**2)
+f = P * (H**2 + B**2) ** (1 / 2) / (pi * d * t * H) - pi**2 * E * (d**2 + t**2) / (
+    8 * (H**2 + B**2)
+)
 
 df_dx1 = sp.diff(f, x1)
 df_dx2 = sp.diff(f, x2)
