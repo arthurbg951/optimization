@@ -85,8 +85,8 @@ def powell(
 ) -> np.ndarray:
     if verbose:
         print(y("Inicializando Método de Powell"))
-    e1 = np.array([1.0, 0.0], dtype=np.float64)
-    e2 = np.array([0.0, 1.0], dtype=np.float64)
+    e1 = np.array([1, 0])
+    e2 = np.array([0, 1])
     directions: list[np.ndarray] = [e1, e2, None]
 
     n_max_ciclos = math.ceil(n_max_steps / 3)
@@ -351,21 +351,21 @@ def bfgs(
     S = np.eye(len(p0), dtype=np.float64)  # Matriz identidade para o tamanho de p0
 
     # Repetição do gradiente
-    n_max_repeated_grad = 5
-    same_grad_count = 0
+    # n_max_repeated_grad = 5
+    # same_grad_count = 0
     norm_last_grad = np.linalg.norm(f_grad(p_atual))
     for i in range(n_max_steps):
         grad_atual = f_grad(p_atual)
 
         # Critério de parada com base no número de repetições do gradiente
-        if np.linalg.norm(grad_atual) == norm_last_grad:
-            same_grad_count += 1
-        else:
-            same_grad_count = 0
-            norm_last_grad = np.linalg.norm(grad_atual)
-        if same_grad_count == n_max_repeated_grad:
-            print(r(f"Gradiente repetido {same_grad_count} vezes. Parando."))
-            break
+        # if np.linalg.norm(grad_atual) == norm_last_grad:
+        #     same_grad_count += 1
+        # else:
+        #     same_grad_count = 0
+        #     norm_last_grad = np.linalg.norm(grad_atual)
+        # if same_grad_count == n_max_repeated_grad:
+        #     print(r(f"Gradiente repetido {same_grad_count} vezes. Parando."))
+        #     break
 
         if np.linalg.norm(grad_atual) < tol_grad:
             if verbose:

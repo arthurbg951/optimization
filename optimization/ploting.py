@@ -82,6 +82,8 @@ def plot_curves(
     # Definir os limites do gráfico e a discretização
     x = np.linspace(min_x - margin, max_x + margin, n_points)
     y = np.linspace(min_y - margin, max_y + margin, n_points)
+    # x = np.linspace(0, 10, n_points)
+    # y = np.linspace(0, 100, n_points)
 
     # Criar a malha de pontos (grid) para x e y
     X, Y = np.meshgrid(x, y)
@@ -280,13 +282,12 @@ def plot_restriction_curves(
     max_x = max(p[0] for p in points)
     max_y = max(p[1] for p in points)
 
-    # margin = 1
-
     # Definir os limites do gráfico e a discretização
+    # margin = 1
     # x = np.linspace(min_x - margin, max_x + margin, n_points)
     # y = np.linspace(min_y - margin, max_y + margin, n_points)
-    x = np.linspace(0, 10, n_points)
-    y = np.linspace(0, 100, n_points)
+    x = np.linspace(-4, 4, n_points)
+    y = np.linspace(-5, 5, n_points)
 
     # Criar a malha de pontos (grid) para x e y
     X, Y = np.meshgrid(x, y)
