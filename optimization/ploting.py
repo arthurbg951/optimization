@@ -77,7 +77,8 @@ def plot_curves(
     max_x = max(p[0] for p in points)
     max_y = max(p[1] for p in points)
 
-    margin = 1
+    # margin = 1
+    margin = 0.1 * np.linalg.norm(pf - pi)
 
     # Definir os limites do gráfico e a discretização
     x = np.linspace(min_x - margin, max_x + margin, n_points)
@@ -91,6 +92,14 @@ def plot_curves(
     # Calcular Z = f(X, Y)
     f_vec = np.vectorize(lambda x, y: func(np.array([x, y])))
     Z = f_vec(X, Y)
+
+    # TODO: Veirificar se pode ser utilizado na função plot 3d
+    # não necessário para plot de curvas de nível
+    normalize = False
+    if normalize:
+        Z_min = Z.min()
+        Z_max = Z.max()
+        Z = (Z - Z_min) / (Z_max - Z_min)
 
     # Criar o gráfico de curvas de nível
     fig = plt.figure(figsize=__fig_size)
@@ -286,8 +295,8 @@ def plot_restriction_curves(
     # margin = 1
     # x = np.linspace(min_x - margin, max_x + margin, n_points)
     # y = np.linspace(min_y - margin, max_y + margin, n_points)
-    x = np.linspace(-4, 4, n_points)
-    y = np.linspace(-5, 5, n_points)
+    x = np.linspace(-6, 4, n_points)
+    y = np.linspace(-3, 5, n_points)
 
     # Criar a malha de pontos (grid) para x e y
     X, Y = np.meshgrid(x, y)

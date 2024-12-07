@@ -172,9 +172,9 @@ def steepest_descent(
 
     points: list[np.ndarray] = [p0]  # Percurso da minimização
 
-    p_atual = p0
+    p_atual = np.copy(p0)
     for i in range(n_max_steps):
-        d = -f_grad(p_atual)
+        d = np.copy(-f_grad(p_atual))  # buffer overflow quando direção é negativa
         if np.linalg.norm(d) < tol_grad:
             if verbose:
                 print(g(f"Convergiu em {i} passos"))  # i, pois ainda não realizou passo
@@ -186,7 +186,7 @@ def steepest_descent(
         a_min = secao_aurea(p_atual, d, aU, aL, func, tol_line)
         next_p = make_step(p_atual, a_min, d)
         points.append(next_p)
-        p_atual = next_p
+        p_atual = np.copy(next_p)
         if verbose:
             print(
                 f"Passo {g(i+1)}: f({next_p[0]:>23}, "
@@ -353,7 +353,7 @@ def bfgs(
     # Repetição do gradiente
     # n_max_repeated_grad = 5
     # same_grad_count = 0
-    norm_last_grad = np.linalg.norm(f_grad(p_atual))
+    # norm_last_grad = np.linalg.norm(f_grad(p_atual))
     for i in range(n_max_steps):
         grad_atual = f_grad(p_atual)
 

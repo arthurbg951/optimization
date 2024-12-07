@@ -45,6 +45,9 @@ FLETCHER_REEVES = "Fletcher Reeves"
 BFGS = "BFGS"
 NEWTON_RAPHSON = "Newton Raphson"
 
+# SETTINGS
+SAVE_MIN_FIG = True
+
 
 ## PROBLEMA 1
 def problema1(
@@ -66,55 +69,6 @@ def problema1(
     ]
     | NotImplementedError
 ):
-    """
-    Função para retornar os parâmetros necessários para solucionar o problema 1
-    do trabalho 2.
-
-    Parâmetros:
-    -----------
-    method: str
-        Método a ser utilizado para resolver o problema.
-        Opções: PENALIDADE, BARREIRA
-
-    Retorno:
-    --------
-    rp: float
-        Parâmetro de penalidade
-
-    beta: float
-        Parâmetro de penalidade
-
-    x0: np.ndarray
-        Ponto inicial
-
-    f: Callable
-        Função objetivo
-
-    grad_f: Callable
-        Gradiente da função objetivo
-
-    hess_f: Callable
-        Hessiana da função objetivo
-
-    hs: list[Callable]
-        Restrições de igualdade
-
-    grad_hs: list[Callable]
-        Gradientes das restrições de igualdade
-
-    hess_hs: list[Callable]
-        Hessiana das restrições de igualdade
-
-    cs: list[Callable]
-        Restrições de desigualdade
-
-    grad_cs: list[Callable]
-        Gradientes das restrições de desigualdade
-
-    hess_cs: list[Callable]
-        Hessiana das restrições de desigualdade
-    """
-
     def f(x: np.ndarray) -> float:
         """Função objetivo"""
         x1 = x[0]
@@ -180,55 +134,6 @@ def problema2(
     ]
     | NotImplementedError
 ):
-    """
-    Função para retornar os parâmetros necessários para solucionar o problema 2
-    do trabalho 2.
-
-    Parâmetros:
-    -----------
-    method: str
-        Método a ser utilizado para resolver o problema.
-        Opções: PENALIDADE, BARREIRA
-
-    Retorno:
-    --------
-    rp: float
-        Parâmetro de penalidade
-
-    beta: float
-        Parâmetro de penalidade
-
-    x0: np.ndarray
-        Ponto inicial
-
-    f: Callable
-        Função objetivo
-
-    grad_f: Callable
-        Gradiente da função objetivo
-
-    hess_f: Callable
-        Hessiana da função objetivo
-
-    hs: list[Callable]
-        Restrições de igualdade
-
-    grad_hs: list[Callable]
-        Gradientes das restrições de igualdade
-
-    hess_hs: list[Callable]
-        Hessiana das restrições de igualdade
-
-    cs: list[Callable]
-        Restrições de desigualdade
-
-    grad_cs: list[Callable]
-        Gradientes das restrições de desigualdade
-
-    hess_cs: list[Callable]
-        Hessiana das restrições de desigualdade
-    """
-
     def f(x: np.ndarray) -> float:
         """Função objetivo"""
         x1 = x[0]
@@ -298,55 +203,6 @@ def problema3(
     ]
     | NotImplementedError
 ):
-    """
-    Função para retornar os parâmetros necessários para solucionar o problema 3
-    do trabalho 2.
-
-    Parâmetros:
-    -----------
-    method: str
-        Método a ser utilizado para resolver o problema.
-        Opções: PENALIDADE, BARREIRA
-
-    Retorno:
-    --------
-    rp: float
-        Parâmetro de penalidade
-
-    beta: float
-        Parâmetro de penalidade
-
-    x0: np.ndarray
-        Ponto inicial
-
-    f: Callable
-        Função objetivo
-
-    grad_f: Callable
-        Gradiente da função objetivo
-
-    hess_f: Callable
-        Hessiana da função objetivo
-
-    hs: list[Callable]
-        Restrições de igualdade
-
-    grad_hs: list[Callable]
-        Gradientes das restrições de igualdade
-
-    hess_hs: list[Callable]
-        Hessiana das restrições de igualdade
-
-    cs: list[Callable]
-        Restrições de desigualdade
-
-    grad_cs: list[Callable]
-        Gradientes das restrições de desigualdade
-
-    hess_cs: list[Callable]
-        Hessiana das restrições de desigualdade
-    """
-
     pi = math.pi
     P = 33e3
     E = 3e7
@@ -602,267 +458,171 @@ def problema3(
     raise NotImplementedError
 
 
-def unit_test(
-    ocr_method=BARREIRA,
-    variables=problema2,
-    min_method=NEWTON_RAPHSON,
-    alfa=0.1,
-    tol_ocr=1e-5,
-    tol_grad=1e-4,
-    tol_line=1e-6,
-    max_steps_min=20,
-    min_verbose=False,
-    show_fig=False,
-):
-    (
-        r_method,
-        beta,
-        x0,
-        f,
-        grad_f,
-        hess_f,
-        hs,
-        grad_hs,
-        hess_hs,
-        cs,
-        grad_cs,
-        hess_cs,
-    ) = variables(ocr_method)
-
-    min, points = OCR(
-        x0,
-        r_method,
-        beta,
-        f,
-        grad_f,
-        hess_f,
-        hs,
-        grad_hs,
-        hess_hs,
-        cs,
-        grad_cs,
-        hess_cs,
-        min_method=min_method,
-        ocr_method=ocr_method,
-        alfa=alfa,
-        tol_ocr=tol_ocr,
-        tol_grad=tol_grad,
-        tol_line=tol_line,
-        max_steps_min=max_steps_min,
-        show_fig=show_fig,
-        min_verbose=min_verbose,
-    )
-
-    plot_restriction_curves(
-        points, f, hs, cs, title=f"{ocr_method} com {min_method}", show_fig=show_fig
-    )
+def __create_folder(folder_name: str = "imgs") -> str:
+    os.makedirs(folder_name, exist_ok=True)
+    return folder_name
 
 
 def main():
-    method = PENALIDADE  # PENALIDADE ou BARREIRA
-    show_fig = False
+    ocr_method = BARREIRA
+    problem = problema1
     min_verbose = False
-    (
-        r_method,
-        beta,
-        x0,
-        f,
-        grad_f,
-        hess_f,
-        hs,
-        grad_hs,
-        hess_hs,
-        cs,
-        grad_cs,
-        hess_cs,
-    ) = problema2(method)
+    show_min_fig = False
+    show_ocr_fig = False
+    save_ocr_fig = True
 
     start_time = datetime.now()
-    uni_min, uni_points = OCR(
-        x0,
-        r_method,
-        beta,
-        f,
-        grad_f,
-        hess_f,
-        hs,
-        grad_hs,
-        hess_hs,
-        cs,
-        grad_cs,
-        hess_cs,
-        UNIVARIANTE,
-        ocr_method=method,
-        alfa=0.1,
-        tol_ocr=1e-6,
-        tol_grad=1e-3,
-        tol_line=1e-9,
+    uni_min, uni_points = ocr_minimizer(
+        ocr_method=ocr_method,
+        variables=problem,
+        min_method=UNIVARIANTE,
+        alfa=0.01,
+        tol_ocr=1e-4,
+        tol_grad=1e-5,
+        tol_line=1e-6,
         max_steps_min=1000,
-        show_fig=show_fig,
+        show_fig=show_min_fig,
         min_verbose=min_verbose,
     )
     time_uni = datetime.now() - start_time
 
     start_time = datetime.now()
-    pow_min, pow_points = OCR(
-        x0,
-        r_method,
-        beta,
-        f,
-        grad_f,
-        hess_f,
-        hs,
-        grad_hs,
-        hess_hs,
-        cs,
-        grad_cs,
-        hess_cs,
-        POWELL,
-        ocr_method=method,
-        alfa=0.1,
-        tol_ocr=1e-3,
+    pow_min, pow_points = ocr_minimizer(
+        ocr_method=ocr_method,
+        variables=problem,
+        min_method=POWELL,
+        alfa=0.001,
+        tol_ocr=1e-4,
         tol_grad=1e-3,
         tol_line=1e-6,
-        max_steps_min=200,
-        show_fig=show_fig,
+        max_steps_min=20,
+        show_fig=show_min_fig,
         min_verbose=min_verbose,
     )
     time_pow = datetime.now() - start_time
 
     start_time = datetime.now()
-    ste_min, ste_points = OCR(
-        x0,
-        r_method,
-        beta,
-        f,
-        grad_f,
-        hess_f,
-        hs,
-        grad_hs,
-        hess_hs,
-        cs,
-        grad_cs,
-        hess_cs,
-        STEEPEST_DESCENT,
-        ocr_method=method,
+    ste_min, ste_points = ocr_minimizer(
+        ocr_method=ocr_method,
+        variables=problem,
+        min_method=STEEPEST_DESCENT,
         alfa=0.01,
         tol_ocr=1e-3,
-        tol_grad=1e-3,
-        tol_line=1e-10,
+        tol_grad=1e-4,
+        tol_line=1e-5,
         max_steps_min=50,
-        show_fig=show_fig,
+        show_fig=show_min_fig,
         min_verbose=min_verbose,
     )
     time_ste = datetime.now() - start_time
 
     start_time = datetime.now()
-    fle_min, fle_points = OCR(
-        x0,
-        r_method,
-        beta,
-        f,
-        grad_f,
-        hess_f,
-        hs,
-        grad_hs,
-        hess_hs,
-        cs,
-        grad_cs,
-        hess_cs,
-        FLETCHER_REEVES,
-        ocr_method=method,
+    fle_min, fle_points = ocr_minimizer(
+        ocr_method=ocr_method,
+        variables=problem,
+        min_method=FLETCHER_REEVES,
         alfa=0.01,
         tol_ocr=1e-3,
-        tol_grad=1e-4,
+        tol_grad=1e-5,
         tol_line=1e-6,
         max_steps_min=20,
-        show_fig=show_fig,
+        show_fig=show_min_fig,
         min_verbose=min_verbose,
     )
     time_fle = datetime.now() - start_time
 
     start_time = datetime.now()
-    new_min, new_points = OCR(
-        x0,
-        r_method,
-        beta,
-        f,
-        grad_f,
-        hess_f,
-        hs,
-        grad_hs,
-        hess_hs,
-        cs,
-        grad_cs,
-        hess_cs,
-        NEWTON_RAPHSON,
-        ocr_method=method,
+    new_min, new_points = ocr_minimizer(
+        ocr_method=ocr_method,
+        variables=problem,
+        min_method=NEWTON_RAPHSON,
         alfa=0.1,
         tol_ocr=1e-5,
-        tol_grad=1e-3,
-        tol_line=1e-5,
+        tol_grad=1e-4,
+        tol_line=1e-7,
         max_steps_min=20,
-        show_fig=show_fig,
+        show_fig=show_min_fig,
         min_verbose=min_verbose,
     )
     time_bfgs = datetime.now() - start_time
 
     start_time = datetime.now()
-    bfgs_min, bfgs_points = OCR(
-        x0,
-        r_method,
-        beta,
-        f,
-        grad_f,
-        hess_f,
-        hs,
-        grad_hs,
-        hess_hs,
-        cs,
-        grad_cs,
-        hess_cs,
-        BFGS,
-        ocr_method=method,
-        alfa=0.1,
-        tol_ocr=1e-5,
+    bfgs_min, bfgs_points = ocr_minimizer(
+        ocr_method=ocr_method,
+        variables=problem,
+        min_method=BFGS,
+        alfa=0.01,
+        tol_ocr=1e-3,
         tol_grad=1e-5,
         tol_line=1e-6,
-        max_steps_min=400,
-        show_fig=show_fig,
+        max_steps_min=20,
+        show_fig=show_min_fig,
         min_verbose=min_verbose,
     )
     time_rap = datetime.now() - start_time
 
     # TODO: Adicionar o número de passos na análise
-    print(f"Resultados para OCR com método: {y(method)}")
-    print(f"{method} {UNIVARIANTE}:      {uni_min}, tempo: {g(time_uni)}")
-    print(f"{method} {POWELL}:           {pow_min}, tempo: {g(time_pow)}")
-    print(f"{method} {STEEPEST_DESCENT}: {ste_min}, tempo: {g(time_ste)}")
-    print(f"{method} {FLETCHER_REEVES}:  {fle_min}, tempo: {g(time_fle)}")
-    print(f"{method} {NEWTON_RAPHSON}:   {new_min}, tempo: {g(time_bfgs)}")
-    print(f"{method} {BFGS}:             {bfgs_min}, tempo: {g(time_rap)}")
+    print(f"Resultados para OCR com método: {y(ocr_method)}")
+    print(f"{ocr_method} {UNIVARIANTE}:      {uni_min}, tempo: {g(time_uni)}")
+    print(f"{ocr_method} {POWELL}:           {pow_min}, tempo: {g(time_pow)}")
+    print(f"{ocr_method} {STEEPEST_DESCENT}: {ste_min}, tempo: {g(time_ste)}")
+    print(f"{ocr_method} {FLETCHER_REEVES}:  {fle_min}, tempo: {g(time_fle)}")
+    print(f"{ocr_method} {NEWTON_RAPHSON}:   {new_min}, tempo: {g(time_bfgs)}")
+    print(f"{ocr_method} {BFGS}:             {bfgs_min}, tempo: {g(time_rap)}")
 
-    if show_fig:
-        if method == PENALIDADE:
-            os.makedirs("imgs", exist_ok=True)
-            plot_restriction_curves(
-                uni_points, f, hs, cs, title=UNIVARIANTE, show_fig=show_fig
-            ).savefig("imgs/uni_penalidade.png")
-            plot_restriction_curves(
-                pow_points, f, hs, cs, title=POWELL, show_fig=show_fig
-            ).savefig("imgs/powell_penalidade.png")
-            plot_restriction_curves(
-                ste_points, f, hs, cs, title=STEEPEST_DESCENT, show_fig=show_fig
-            ).savefig("imgs/steep_penalidade.png")
-            plot_restriction_curves(
-                fle_points, f, hs, cs, title=FLETCHER_REEVES, show_fig=show_fig
-            ).savefig("imgs/fletch_penalidade.png")
-            plot_restriction_curves(
-                new_points, f, hs, cs, title=NEWTON_RAPHSON, show_fig=show_fig
-            ).savefig("imgs/newton_penalidade.png")
-            plot_restriction_curves(
-                bfgs_points, f, hs, cs, title=BFGS, show_fig=show_fig
-            ).savefig("imgs/bfgs_penalidade.png")
+    if show_ocr_fig or save_ocr_fig:
+        # TODO: Repensar uma forma alternativa para requisitar os dados
+        # talvez uma abordagem OOP resolva o problema elegantemente
+        # utilizar um dict também pode ser uma solução
+
+        variables = problem(ocr_method)
+        f = lambda x: variables[3](x)  # noqa
+        hs = variables[6]
+        cs = variables[9]
+
+        uni_fig = plot_restriction_curves(
+            uni_points, f, hs, cs, title=UNIVARIANTE, show_fig=show_ocr_fig
+        )
+        pow_fig = plot_restriction_curves(
+            pow_points, f, hs, cs, title=POWELL, show_fig=show_ocr_fig
+        )
+        ste_fig = plot_restriction_curves(
+            ste_points, f, hs, cs, title=STEEPEST_DESCENT, show_fig=show_ocr_fig
+        )
+        fle_fig = plot_restriction_curves(
+            fle_points, f, hs, cs, title=FLETCHER_REEVES, show_fig=show_ocr_fig
+        )
+        new_fig = plot_restriction_curves(
+            new_points, f, hs, cs, title=NEWTON_RAPHSON, show_fig=show_ocr_fig
+        )
+        bfgs_fig = plot_restriction_curves(
+            bfgs_points, f, hs, cs, title=BFGS, show_fig=show_ocr_fig
+        )
+
+        if save_ocr_fig:
+            results_folder = __create_folder()
+
+            # uni_folder = __create_folder(os.path.join(results_folder, UNIVARIANTE))
+            # pow_folder = __create_folder(os.path.join(results_folder, POWELL))
+            # ste_folder = __create_folder(os.path.join(results_folder, STEEPEST_DESCENT))
+            # fle_folder = __create_folder(os.path.join(results_folder, FLETCHER_REEVES))
+            # new_folder = __create_folder(os.path.join(results_folder, NEWTON_RAPHSON))
+            # bfgs_folder = __create_folder(os.path.join(results_folder, BFGS))
+
+            uni_fig.savefig(
+                os.path.join(results_folder, f"{UNIVARIANTE}_{ocr_method}.png")
+            )
+            pow_fig.savefig(os.path.join(results_folder, f"{POWELL}_{ocr_method}.png"))
+            ste_fig.savefig(
+                os.path.join(results_folder, f"{STEEPEST_DESCENT}_{ocr_method}.png")
+            )
+            fle_fig.savefig(
+                os.path.join(results_folder, f"{FLETCHER_REEVES}_{ocr_method}.png")
+            )
+            new_fig.savefig(
+                os.path.join(results_folder, f"{NEWTON_RAPHSON}_{ocr_method}.png")
+            )
+            bfgs_fig.savefig(os.path.join(results_folder, f"{BFGS}_{ocr_method}.png"))
 
 
 def minimizer(
@@ -975,6 +735,65 @@ def minimizer(
     raise NotImplementedError
 
 
+def ocr_minimizer(
+    ocr_method=BARREIRA,
+    variables=problema2,
+    min_method=NEWTON_RAPHSON,
+    alfa=0.1,
+    tol_ocr=1e-5,
+    tol_grad=1e-4,
+    tol_line=1e-6,
+    max_steps_min=20,
+    min_verbose=False,
+    show_fig=False,
+):
+    (
+        r_method,
+        beta,
+        x0,
+        f,
+        grad_f,
+        hess_f,
+        hs,
+        grad_hs,
+        hess_hs,
+        cs,
+        grad_cs,
+        hess_cs,
+    ) = variables(ocr_method)
+
+    min, points = OCR(
+        x0,
+        r_method,
+        beta,
+        f,
+        grad_f,
+        hess_f,
+        hs,
+        grad_hs,
+        hess_hs,
+        cs,
+        grad_cs,
+        hess_cs,
+        min_method=min_method,
+        ocr_method=ocr_method,
+        alfa=alfa,
+        tol_ocr=tol_ocr,
+        tol_grad=tol_grad,
+        tol_line=tol_line,
+        max_steps_min=max_steps_min,
+        show_fig=show_fig,
+        min_verbose=min_verbose,
+    )
+
+    if show_fig:
+        plot_restriction_curves(
+            points, f, hs, cs, title=f"{ocr_method} com {min_method}", show_fig=show_fig
+        )
+
+    return min, points
+
+
 def OCR(
     x0: np.ndarray,
     r_method: float,
@@ -997,6 +816,7 @@ def OCR(
     max_steps_ocr: int = 20,
     max_steps_min: int = 1000,
     show_fig=False,
+    save_min_fig=SAVE_MIN_FIG,
     min_verbose=False,
 ):
     if ocr_method == PENALIDADE and beta <= 1:
@@ -1104,21 +924,15 @@ def OCR(
         # Implementando alfa adaptativo para BARREIRA
         if ocr_method == BARREIRA:
             # k = np.argwhere(np.array([-(c(x_min) ** -1) for c in cs]) > 0).flatten()
-            k = p(x_min)
-            """
-            caso k seja vazio, o ponto está dentro da região da restrição
-            caso contrário, o ponto está fora da região da restrição
-            se estiver fora da região de restrição, siginifica que o alfa é muito grande
-            e deve ser reduzido
-            """
-            # if not len(k) == 0:  # saiu da região
-            if k < 0:
+            k = float(p(x_min))
+            if k < 0.0:
                 alfa_buff = alfa_buff / 2
-                print(r(f"Quebrando Passo: {alfa_buff} ") + f"x_buff: {x_buff}")
+                if min_verbose:
+                    print(r(f"Quebrando Passo: {alfa_buff} ") + f"x_buff: {x_buff}")
                 continue
-            else:
-                alfa_buff = alfa
-                print(g(f"Passo Normal: {alfa_buff} " f"x_min: {x_min}"))
+            # else:
+            #     alfa_buff = alfa
+            #     print(g(f"Passo Normal: {alfa_buff} " f"x_min: {x_min}"))
 
         # Contabilizando iterações
         i += 1
@@ -1131,25 +945,46 @@ def OCR(
             f"mínimo: [{x_min[0]:>22}, {x_min[1]:>22}] "
             f"n_passos: {min_method}: {y(len(points)-1):>5}"
         )
-        if True:
-            # fig_fi = plot_curves(
-            #     points,
-            #     fi,
-            #     title=f"Pseudo função objetivo {i} - metodo: {min_method} r: {r_buff}",
-            #     show_fig=True,
-            # ).savefig(f"fi_{ocr_method}_{min_method}_{i}.png")
+
+        if show_fig or save_min_fig:
+            fig_fi = plot_curves(
+                points,
+                fi,
+                title=f"Pseudo função objetivo {i} - metodo: {min_method} r: {r_buff}",
+                show_fig=show_fig,
+            )
+            # JÁ ESTÁ PRESENTE NA FUNÇÃO MAIN
             # fig_ocr = plot_restriction_curves(
-            #     points,
-            #     fi,
+            #     hist_points,
+            #     f,
             #     hs,
             #     cs,
-            #     show_fig=False,
+            #     show_fig=show_fig,
             #     title=f"Gráfico de f(x), h(x) e c(x) passo {i} OCR - metodo: {min_method} r: {r_buff}",
             # )
-            # fig_ocr.savefig(f"ocr_{ocr_method}_{min_method}_{i}.png")
+
+            if save_min_fig:
+                # TODO: remover esse import e alterar o controle do plot das figuras
+                # no próprio módulo de plotagem.
+                # Utilizar uma figura global privativa e alterar todas as funções dentro
+                # do módulo para consumirem a mesma figura. será necessário alterar a
+                # adicionar um método para limpar a figura
+                import matplotlib.pyplot as plt
+
+                output_folder = __create_folder("ocr_imgs")
+                ocr_folder = __create_folder(os.path.join(output_folder, ocr_method))
+                min_folder = __create_folder(os.path.join(ocr_folder, min_method))
+
+                fig_fi.savefig(
+                    os.path.join(min_folder, f"fi_{ocr_method}_{min_method}_{i}.png")
+                )
+                plt.close(fig_fi)
+
+                # fig_ocr.savefig(os.path.join(ocr_folder, f"ocr_{ocr_method}_{i}.png"))
+                # plt.close(fig_ocr)
+
             # fig_result = plot_figs(fig_fi, fig_ocr, show_fig=False)
             # fig_result.savefig(f"ocr_{ocr_method}_{min_method}_{i}.png")
-            pass
 
         # Atualizar rp
         r_buff = beta * r_buff
@@ -1173,5 +1008,4 @@ def OCR(
 
 
 if __name__ == "__main__":
-    # main()
-    unit_test()
+    main()
