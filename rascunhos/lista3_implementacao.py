@@ -30,12 +30,12 @@ def univariante(p0: np.ndarray, n_max_steps=1000) -> np.ndarray:
         )
         next_p = make_step(actual_p, a_min, actual_d)
         print(
-            f"Passo {g(i+1)}: Alfa {a_min} f({next_p[0]}, {next_p[1]})={a(next_p)} com {n_steps} passos"
+            f"Passo {g(i + 1)}: Alfa {a_min} f({next_p[0]}, {next_p[1]})={a(next_p)} com {n_steps} passos"
         )
 
         # Verificar se convergiu
         if a(actual_p) - a(next_p) < tol:
-            print(g(f"Convergiu em {i+1} passos"))
+            print(g(f"Convergiu em {i + 1} passos"))
             return next_p
 
         # Trocar direção
@@ -80,12 +80,12 @@ def powell(p0: np.ndarray, n_max_steps=1000):
         next_p = make_step(actual_p, a_min, d)
 
         print(
-            f"Passo {g(i+1)}. Alfa {a_min} Minimo encontrado: {a(next_p)} com {n_steps} passos"
+            f"Passo {g(i + 1)}. Alfa {a_min} Minimo encontrado: {a(next_p)} com {n_steps} passos"
         )
 
         # Verificar se convergiu
         if a(actual_p) - a(next_p) < tol:
-            print(g(f"Convergiu em {i+1} passos"))
+            print(g(f"Convergiu em {i + 1} passos"))
             return next_p
 
         # Trocar ponto

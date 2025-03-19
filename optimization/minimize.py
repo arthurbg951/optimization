@@ -44,14 +44,14 @@ def univariante(
         grad_norm = np.linalg.norm(f_grad(next_p))
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]:>23}, {next_p[1]:>23}) = {func(next_p):>23} "
+                f"Passo {g(i + 1)}: f({next_p[0]:>23}, {next_p[1]:>23}) = {func(next_p):>23} "
                 f"norm gradient={grad_norm:>23}"
             )
 
         # Verificar se convergiu
         if grad_norm < tol_grad:
             if verbose:
-                print(g(f"Convergiu em {i+1} passos"))
+                print(g(f"Convergiu em {i + 1} passos"))
             if monitor:
                 return next_p, points
             return next_p
@@ -110,7 +110,7 @@ def powell(
             # Verificar se convergiu
             if np.linalg.norm(f_grad(actual_p)) < tol_grad:
                 if verbose:
-                    print(g(f"Convergiu em {steps_count+1} passos"))
+                    print(g(f"Convergiu em {steps_count + 1} passos"))
                 if monitor:
                     return actual_p, points
                 return actual_p
@@ -137,7 +137,7 @@ def powell(
             if verbose:
                 # print(f"Vetor de direções : {directions} d: {d}")
                 print(
-                    f"Passo {g(steps_count+1)}: "
+                    f"Passo {g(steps_count + 1)}: "
                     f"f({next_p[0]:>23}, {next_p[1]:>23}) = {func(next_p):>23} "
                     f"grad norm = {np.linalg.norm(f_grad(next_p)):>23}"
                 )
@@ -189,7 +189,7 @@ def steepest_descent(
         p_atual = np.copy(next_p)
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]:>23}, "
+                f"Passo {g(i + 1)}: f({next_p[0]:>23}, "
                 f"{next_p[1]:>23})={func(next_p):>23} "
                 f"grad norm={np.linalg.norm(f_grad(next_p)):>23}"
             )
@@ -252,7 +252,7 @@ def fletcher_reeves(
 
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]:>23}, "
+                f"Passo {g(i + 1)}: f({next_p[0]:>23}, "
                 f"{next_p[1]:>23}) = {func(next_p):>23}, "
                 f"grad norm = {np.linalg.norm(f_grad(next_p)):>23}"
             )
@@ -321,7 +321,7 @@ def newton_raphson(
         points.append(next_p)
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]:>23}, {next_p[1]:>23})={func(next_p):>23} grad norm={np.linalg.norm(f_grad(next_p)):>23}"
+                f"Passo {g(i + 1)}: f({next_p[0]:>23}, {next_p[1]:>23})={func(next_p):>23} grad norm={np.linalg.norm(f_grad(next_p)):>23}"
             )
         p_atual = next_p
 
@@ -350,6 +350,7 @@ def bfgs(
     p_atual = np.copy(p0)
     S = np.eye(len(p0), dtype=np.float64)  # Matriz identidade para o tamanho de p0
 
+    # TODO: Verificar necessidade
     # Repetição do gradiente
     # n_max_repeated_grad = 5
     # same_grad_count = 0
@@ -404,7 +405,7 @@ def bfgs(
 
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]:>23}, {next_p[1]:>23}) = {func(next_p):>23}, "
+                f"Passo {g(i + 1)}: f({next_p[0]:>23}, {next_p[1]:>23}) = {func(next_p):>23}, "
                 f"grad norm = {np.linalg.norm(grad_prox):>23}"
             )
 

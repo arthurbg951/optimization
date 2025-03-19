@@ -17,6 +17,7 @@ p2 = tuple(passo_constante(np.array(p1), 0.5, d, f_))
 # Definindo função simbólica e variáveis
 x1, x2 = sp.symbols("x1 x2")
 import math
+
 pi = math.pi
 P = 33e3
 E = 3e7

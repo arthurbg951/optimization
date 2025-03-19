@@ -943,7 +943,7 @@ def OCR(
             f"Iteração {g(f'{i:>3}')}: "
             f"Critério de convergência: {conv_value:<22} "
             f"mínimo: [{x_min[0]:>22}, {x_min[1]:>22}] "
-            f"n_passos: {min_method}: {y(len(points)-1):>5}"
+            f"n_passos: {min_method}: {y(len(points) - 1):>5}"
         )
 
         if show_fig or save_min_fig:

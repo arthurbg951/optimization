@@ -3,7 +3,6 @@ from typing import Callable
 
 
 def is_symetric(matriz: np.ndarray) -> bool:
-    # Verifica se a matriz é simétrica
     if np.array_equal(matriz, matriz.T):
         # Calcula os autovalores
         autovalores = np.linalg.eigvals(matriz)

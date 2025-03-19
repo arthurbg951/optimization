@@ -272,13 +272,13 @@ def methods(
     time_rap = datetime.now() - start_time
 
     print(
-        f"Univariante:      [{min_uni[0]:<22}, {min_uni[1]:<22}] f={func(min_uni):<23} passos={len(points_uni)-1:>4} tempo={g(time_uni):>14}"
+        f"Univariante:      [{min_uni[0]:<22}, {min_uni[1]:<22}] f={func(min_uni):<23} passos={len(points_uni) - 1:>4} tempo={g(time_uni):>14}"
     )
     print(
-        f"Powell:           [{min_pow[0]:<22}, {min_pow[1]:<22}] f={func(min_pow):<23} passos={len(points_pow)-1:>4} tempo={g(time_pow):>14}"
+        f"Powell:           [{min_pow[0]:<22}, {min_pow[1]:<22}] f={func(min_pow):<23} passos={len(points_pow) - 1:>4} tempo={g(time_pow):>14}"
     )
     print(
-        f"Steepest Descent: [{min_ste[0]:<22}, {min_ste[1]:<22}] f={func(min_ste):<23} passos={len(points_ste)-1:>4} tempo={g(time_ste):>14}"
+        f"Steepest Descent: [{min_ste[0]:<22}, {min_ste[1]:<22}] f={func(min_ste):<23} passos={len(points_ste) - 1:>4} tempo={g(time_ste):>14}"
     )
     print(
         f"Fletcher Reeves:  [{min_fle[0]:<22}, {min_fle[1]:<22}] f={func(min_fle):<23} passos={len(points_fle):>4} tempo={g(time_fle):>14}"
@@ -394,13 +394,13 @@ def univariante(
         points.append(next_p)
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]}, {next_p[1]})={func(next_p)} norm gradient={np.linalg.norm(f_grad(next_p))}"
+                f"Passo {g(i + 1)}: f({next_p[0]}, {next_p[1]})={func(next_p)} norm gradient={np.linalg.norm(f_grad(next_p))}"
             )
 
         # Verificar se convergiu
         if np.linalg.norm(f_grad(next_p)) < tol:
             if verbose:
-                print(g(f"Convergiu em {i+1} passos"))
+                print(g(f"Convergiu em {i + 1} passos"))
             if monitor:
                 return next_p, points
             return next_p
@@ -455,7 +455,7 @@ def powell(
             # Verificar se convergiu
             if np.linalg.norm(f_grad(actual_p)) < tol:
                 if verbose:
-                    print(g(f"Convergiu em {steps_count+1} passos"))
+                    print(g(f"Convergiu em {steps_count + 1} passos"))
                 if monitor:
                     return actual_p, points
                 return actual_p
@@ -482,7 +482,7 @@ def powell(
             if verbose:
                 # print(f"Vetor de direções : {directions} d: {d}")
                 print(
-                    f"Passo {g(steps_count+1)}: f({next_p[0]}, {next_p[1]}) = {func(next_p)}"
+                    f"Passo {g(steps_count + 1)}: f({next_p[0]}, {next_p[1]}) = {func(next_p)}"
                 )
 
             # Atualizar posição atual
@@ -528,7 +528,7 @@ def steepest_descent(
         points.append(next_p)
         p_atual = next_p
         if verbose:
-            print(f"Passo {g(i+1)}: f({next_p[0]}, {next_p[1]})={func(next_p)}")
+            print(f"Passo {g(i + 1)}: f({next_p[0]}, {next_p[1]})={func(next_p)}")
 
     print(r("Número de iterações máximas atingido Steepest Descent."))
     if monitor:
@@ -617,7 +617,7 @@ def fletcher_reeves(
 
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]}, {next_p[1]}) = {func(next_p)}, "
+                f"Passo {g(i + 1)}: f({next_p[0]}, {next_p[1]}) = {func(next_p)}, "
                 f"grad norm = {np.linalg.norm(f_grad(next_p))}"
             )
 
@@ -671,7 +671,7 @@ def newton_raphson(
         points.append(next_p)
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]}, {next_p[1]})={func(next_p)} grad norm={np.linalg.norm(f_grad(next_p))}"
+                f"Passo {g(i + 1)}: f({next_p[0]}, {next_p[1]})={func(next_p)} grad norm={np.linalg.norm(f_grad(next_p))}"
             )
         p_atual = next_p
 
@@ -737,7 +737,7 @@ def bfgs(
 
         if verbose:
             print(
-                f"Passo {g(i+1)}: f({next_p[0]}, {next_p[1]}) = {func(next_p)}, "
+                f"Passo {g(i + 1)}: f({next_p[0]}, {next_p[1]}) = {func(next_p)}, "
                 f"grad norm = {np.linalg.norm(grad_prox)}"
             )
 
